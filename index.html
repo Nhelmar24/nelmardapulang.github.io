@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nelmar Dapulang | Full-Stack Developer Portfolio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfolio of Nelmar Dapulang, Full-Stack Developer specializing in Laravel, PHP, backend systems, and scalable web applications.">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --bg-alt: #020617;
+            --card: #111827;
+            --accent: #38bdf8;
+            --accent-soft: rgba(56, 189, 248, 0.15);
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+        }
+
+        * {
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top left, #1f2937, #020617);
+            color: var(--text);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Layout */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(14px);
+            background: linear-gradient(to right, rgba(15,23,42,0.96), rgba(15,23,42,0.85));
+            border-bottom: 1px solid rgba(31,41,55,0.8);
+        }
+
+        .nav {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 30%, #38bdf8, #0ea5e9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #0b1220;
+            font-size: 1.1rem;
+        }
+
+        .nav-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .nav-subtitle {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .nav-links a {
+            position: relative;
+            text-decoration: none;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .nav-links a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -0.2rem;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.18s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn-outline {
+            border-radius: 999px;
+            border: 1px solid var(--accent);
+            padding: 0.4rem 0.9rem;
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .btn-outline:hover {
+            background: var(--accent-soft);
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2.5rem 1.25rem 3rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-divider {
+            width: 52px;
+            height: 2px;
+            background: linear-gradient(to right, var(--accent), transparent);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Hero */
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 2.3fr) minmax(0, 1.7fr);
+            gap: 2rem;
+            align-items: center;
+            padding-top: 1.5rem;
+            padding-bottom: 1.5rem;
+        }
+
+        .hero-title {
+            font-size: clamp(1.9rem, 3.2vw, 2.4rem);
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        .hero-highlight {
+            background: linear-gradient(to right, #38bdf8, #a855f7);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 0.95rem;
+            color: var(--muted);
+            max-width: 520px;
+            line-height: 1.5;
+        }
+
+        .hero-tags {
+            margin-top: 1.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(15,23,42,0.7);
+            color: var(--muted);
+        }
+
+        .hero-actions {
+            margin-top: 1.4rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .btn-primary {
+            border-radius: 999px;
+            padding: 0.55rem 1.2rem;
+            border: none;
+            background: linear-gradient(135deg, #0ea5e9, #22c55e);
+            color: #0b1220;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.95;
+        }
+
+        .btn-ghost {
+            border-radius: 999px;
+            padding: 0.55rem 1.2rem;
+            border: 1px solid var(--border);
+            background: rgba(15,23,42,0.8);
+            color: var(--muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+
+        .hero-card {
+            border-radius: 1rem;
+            border: 1px solid var(--border);
+            background: radial-gradient(circle at top left, rgba(56,189,248,0.16), rgba(15,23,42,0.96));
+            padding: 1.4rem 1.3rem;
+        }
+
+        .hero-card h3 {
+            font-size: 0.95rem;
+            margin-top: 0;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-card p {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 0.85rem;
+            margin-top: 0.7rem;
+        }
+
+        .meta-item {
+            font-size: 0.8rem;
+        }
+
+        .meta-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .meta-value {
+            font-weight: 500;
+        }
+
+        /* Cards & lists */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 1.25rem;
+        }
+
+        .card {
+            border-radius: 0.9rem;
+            border: 1px solid var(--border);
+            background: rgba(15,23,42,0.9);
+            padding: 1.1rem 1.1rem 1rem;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 0.45rem;
+            font-size: 0.95rem;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .pill-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+
+        .pill {
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            padding: 0.2rem 0.55rem;
+            font-size: 0.72rem;
+            color: var(--muted);
+        }
+
+        /* Experience */
+        .experience-item {
+            margin-bottom: 1.2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(31,41,55,0.7);
+        }
+
+        .experience-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .experience-role {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .experience-company {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .experience-meta {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .experience-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0.4rem 0 0;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+
+        .experience-list li {
+            margin-bottom: 0.25rem;
+            position: relative;
+            padding-left: 1rem;
+        }
+
+        .experience-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        /* Projects */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 1.25rem;
+        }
+
+        .project-card {
+            border-radius: 0.9rem;
+            border: 1px solid var(--border);
+            background: radial-gradient(circle at top left, rgba(56,189,248,0.08), rgba(15,23,42,0.95));
+            padding: 1.1rem;
+        }
+
+        .project-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .project-meta {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .project-desc {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            font-size: 0.72rem;
+        }
+
+        .project-tag {
+            padding: 0.18rem 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(56,189,248,0.4);
+            background: rgba(15,23,42,0.9);
+            color: #bae6fd;
+        }
+
+        /* Contact */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 2.2fr 1.8fr;
+            gap: 1.5rem;
+        }
+
+        .contact-item {
+            font-size: 0.85rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .contact-label {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--muted);
+        }
+
+        .contact-value {
+            font-size: 0.92rem;
+            font-weight: 500;
+        }
+
+        footer {
+            border-top: 1px solid rgba(31,41,55,0.8);
+            padding: 1.1rem 1.25rem 1.4rem;
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-align: center;
+            background: #020617;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .hero,
+            .grid-2,
+            .project-grid,
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.6rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                row-gap: 0.4rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding-inline: 1rem;
+            }
+
+            .hero-card {
+                margin-top: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="nav">
+        <div class="nav-left">
+            <div class="nav-logo">ND</div>
+            <div>
+                <div class="nav-title">Nelmar Dapulang</div>
+                <span class="nav-subtitle">Full-Stack Developer • System Architecture • Backend Engineering</span>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="#about">About</a>
+            <a href="#skills">Skills</a>
+            <a href="#experience">Experience</a>
+            <a href="#projects">Projects</a>
+            <a href="#contact">Contact</a>
+            <a href="#contact" class="btn-outline">Hire Me</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+    <!-- Hero / About -->
+    <section id="about">
+        <div class="hero">
+            <div>
+                <h1 class="hero-title">
+                    Full-Stack Developer focused on
+                    <span class="hero-highlight">scalable systems & long-term growth</span>.
+                </h1>
+                <p class="hero-subtitle">
+                    I design and build robust, production-ready web applications with a strong focus on backend
+                    architecture, data integrity, and maintainable code. I’ve worked with international teams across
+                    the US, Korea, and Europe, delivering solutions in accounting, HR, automation, and custom business systems.
+                </p>
+
+                <div class="hero-tags">
+                    <span class="tag">Full-Stack Development</span>
+                    <span class="tag">System Architecture</span>
+                    <span class="tag">Backend Engineering</span>
+                    <span class="tag">Remote & Distributed Teams</span>
+                </div>
+
+                <div class="hero-actions">
+                    <a href="#projects" class="btn-primary">View Highlight Projects</a>
+                    <a href="#experience" class="btn-ghost">See Experience</a>
+                </div>
+            </div>
+
+            <aside class="hero-card">
+                <h3>At a Glance</h3>
+                <p>
+                    Fast, self-directed learner with a strong track record of owning features end-to-end —
+                    from requirements and architecture to deployment and optimization.
+                </p>
+                <div class="hero-meta">
+                    <div class="meta-item">
+                        <div class="meta-label">Location</div>
+                        <div class="meta-value">Carmona, Cavite (PH)</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Experience</div>
+                        <div class="meta-value">10+ years in software & IT</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Current Focus</div>
+                        <div class="meta-value">Career growth & complex systems</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-label">Available For</div>
+                        <div class="meta-value">Remote / Hybrid roles & projects</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <!-- Skills -->
+    <section id="skills">
+        <div class="section-title">Skills</div>
+        <div class="section-divider"></div>
+        <div class="grid-2">
+            <div class="card">
+                <h3>Core Technical Stack</h3>
+                <p>Technologies I use to design, build, and maintain reliable web applications.</p>
+                <div class="pill-row">
+                    <span class="pill">Laravel 12</span>
+                    <span class="pill">PHP / OOP</span>
+                    <span class="pill">CodeIgniter 3</span>
+                    <span class="pill">Node.js</span>
+                    <span class="pill">Python</span>
+                    <span class="pill">C#.NET</span>
+                    <span class="pill">REST APIs</span>
+                    <span class="pill">MySQL / PhpMyAdmin</span>
+                    <span class="pill">Google Cloud</span>
+                    <span class="pill">Firebase</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Frontend & Product Delivery</h3>
+                <p>Creating usable, maintainable interfaces and shipping features with confidence.</p>
+                <div class="pill-row">
+                    <span class="pill">Vue.js</span>
+                    <span class="pill">Livewire</span>
+                    <span class="pill">Blade / HTML</span>
+                    <span class="pill">Bootstrap / Tailwind</span>
+                    <span class="pill">Responsive Layouts</span>
+                    <span class="pill">Git / GitHub</span>
+                    <span class="pill">Agile Collaboration</span>
+                    <span class="pill">Technical Documentation</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience -->
+    <section id="experience">
+        <div class="section-title">Experience</div>
+        <div class="section-divider"></div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Full-Stack Developer</div>
+                    <div class="experience-company">Tabulate LLC / Premium Designscape LLC — New Jersey, USA (WFH)</div>
+                </div>
+                <div class="experience-meta">2023 – 2025</div>
+            </div>
+            <ul class="experience-list">
+                <li>Led full-stack development and system architecture for accounting, payroll, and HR platforms.</li>
+                <li>Designed database schemas and process workflows to support scalable multi-module systems.</li>
+                <li>Owned implementation quality, ensuring clean, secure, and maintainable code across backend and frontend.</li>
+                <li>Supported hiring and onboarding of developers, contributing to team capability and growth.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Full-Stack Developer</div>
+                    <div class="experience-company">Unitech Ltd & Licorne Ltd — Korean Company (WFH)</div>
+                </div>
+                <div class="experience-meta">2022 – 2023</div>
+            </div>
+            <ul class="experience-list">
+                <li>Built and maintained backend infrastructures using CodeIgniter (PHP), Python, and C#.</li>
+                <li>Developed automated casino and sports-betting systems with prediction, odds, and payout logic.</li>
+                <li>Integrated automation modules into CRM platforms for consistent user tracking and analytics.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Software Backend Developer (Freelance)</div>
+                    <div class="experience-company">NFG Stock Trading — Germany (Remote)</div>
+                </div>
+                <div class="experience-meta">2022</div>
+            </div>
+            <ul class="experience-list">
+                <li>Collaborated with cross-functional teams to design and implement new backend features.</li>
+                <li>Diagnosed and resolved production issues, improving stability and performance.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Software Backend Developer</div>
+                    <div class="experience-company">Vendtap Inc — New York, USA (Remote)</div>
+                </div>
+                <div class="experience-meta">2022</div>
+            </div>
+            <ul class="experience-list">
+                <li>Implemented backend features in Laravel aligned with evolving business requirements.</li>
+                <li>Improved reliability and maintainability through refactoring and performance tuning.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Software Developer</div>
+                    <div class="experience-company">Schumacher Elevator Zhangjiagang Inc. — Sta. Rosa, Laguna</div>
+                </div>
+                <div class="experience-meta">2019 – 2021</div>
+            </div>
+            <ul class="experience-list">
+                <li>Led deployment of access control, CCTV, and security system integrations.</li>
+                <li>Managed IT operations and built internal web applications to streamline workflows.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Software Developer & IT Operations</div>
+                    <div class="experience-company">P-Vision Electronic Solutions Inc. — Sta. Rosa, Laguna</div>
+                </div>
+                <div class="experience-meta">2016 – 2019</div>
+            </div>
+            <ul class="experience-list">
+                <li>Oversaw IT support, network, and systems, ensuring uptime and smooth operations.</li>
+                <li>Developed internal systems that improved efficiency and reporting.</li>
+            </ul>
+        </div>
+
+        <div class="experience-item">
+            <div class="experience-header">
+                <div>
+                    <div class="experience-role">Other Technical Experience</div>
+                    <div class="experience-company">Nato Catering, Moderntech Computer System Inc., P.A. Builders</div>
+                </div>
+                <div class="experience-meta">2009 – 2019</div>
+            </div>
+            <ul class="experience-list">
+                <li>Android app development with Firebase integration for real-time features.</li>
+                <li>Technical support and electronics repair for computers, peripherals, and servers.</li>
+                <li>Master Electrician and project foreman for residential and commercial electrical projects.</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Projects -->
+    <section id="projects">
+        <div class="section-title">Highlight Projects</div>
+        <div class="section-divider"></div>
+
+        <div class="project-grid">
+            <article class="project-card">
+                <div class="project-title">Automated Casino & Sports Betting Engine</div>
+                <div class="project-meta">Backend • CodeIgniter / Python / C#</div>
+                <p class="project-desc">
+                    Designed and implemented a backend engine for automated casino and sports wagering,
+                    including prediction logic, wagering cycles, odds computation, and real-time payout monitoring.
+                </p>
+                <div class="project-tags">
+                    <span class="project-tag">High-Throughput Logic</span>
+                    <span class="project-tag">Automation</span>
+                    <span class="project-tag">Complex Business Rules</span>
+                </div>
+            </article>
+
+            <article class="project-card">
+                <div class="project-title">Accounting, Payroll & HR Management Platform</div>
+                <div class="project-meta">Full Stack • Laravel</div>
+                <p class="project-desc">
+                    Built a multi-module platform for payroll, accounting, and HR workflows — including developer
+                    onboarding, record management, and compensation tracking for a US-based company.
+                </p>
+                <div class="project-tags">
+                    <span class="project-tag">Laravel 12</span>
+                    <span class="project-tag">System Architecture</span>
+                    <span class="project-tag">Business Workflows</span>
+                </div>
+            </article>
+
+            <article class="project-card">
+                <div class="project-title">QR-Based Time In/Out Management</div>
+                <div class="project-meta">Web App • PHP / MySQL • Academic Collaboration</div>
+                <p class="project-desc">
+                    Developed a QR-powered attendance tracking system for university students, with secure scanning,
+                    logging, and reporting to support faculty and administrative workflows.
+                </p>
+                <div class="project-tags">
+                    <span class="project-tag">PHP</span>
+                    <span class="project-tag">QR Code</span>
+                    <span class="project-tag">Education</span>
+                </div>
+            </article>
+
+            <article class="project-card">
+                <div class="project-title">Clinic Scheduling & Appointment System</div>
+                <div class="project-meta">Web App • PHP / MySQL • RSU</div>
+                <p class="project-desc">
+                    Created a clinic scheduling application to manage appointments, time slots, and patient queues,
+                    improving visibility and reducing scheduling conflicts for a university clinic.
+                </p>
+                <div class="project-tags">
+                    <span class="project-tag">Scheduling</span>
+                    <span class="project-tag">Role-Based Flows</span>
+                    <span class="project-tag">Operational Efficiency</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact">
+        <div class="section-title">Contact</div>
+        <div class="section-divider"></div>
+
+        <div class="contact-grid">
+            <div>
+                <p style="font-size:0.9rem;color:var(--muted);max-width:460px;">
+                    I’m open to opportunities where I can contribute to complex systems, help shape architecture,
+                    and continue growing as a full-stack engineer. If my experience matches what you’re building,
+                    feel free to reach out.
+                </p>
+
+                <div class="contact-item">
+                    <div class="contact-label">Email</div>
+                    <div class="contact-value">
+                        <a href="mailto:nelmardapulang@gmail.com">nelmardapulang@gmail.com</a>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <div class="contact-label">Location</div>
+                    <div class="contact-value">Carmona, Cavite, Philippines</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="contact-item">
+                    <div class="contact-label">GitHub</div>
+                    <div class="contact-value">
+                        <!-- TODO: Update with your actual GitHub profile URL -->
+                        <a href="https://github.com/your-github-username" target="_blank">github.com/your-github-username</a>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-label">LinkedIn</div>
+                    <div class="contact-value">
+                        <!-- TODO: Update with your actual LinkedIn profile URL -->
+                        <a href="https://www.linkedin.com/in/your-linkedin" target="_blank">linkedin.com/in/your-linkedin</a>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-label">Resume / CV</div>
+                    <div class="contact-value">
+                        <!-- If you upload your PDF CV later, you can link it here -->
+                        <span>Available upon request or via email</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer>
+    © <span id="year"></span> Nelmar Dapulang — Portfolio. Built with HTML & CSS, hosted on GitHub Pages.
+</footer>
+
+<script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
