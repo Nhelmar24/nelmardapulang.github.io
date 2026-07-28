@@ -1,1146 +1,517 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Nelmar Dapulang | Full-Stack Developer Portfolio</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="Portfolio of Nelmar Dapulang, Full-Stack Developer specializing in Laravel, PHP, backend systems, and scalable web applications.">
-    <style>
-        :root {
-            --bg: #0f172a;
-            --bg-alt: #020617;
-            --card: #111827;
-            --accent: #38bdf8;
-            --accent-soft: rgba(56, 189, 248, 0.15);
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --border: #1f2937;
-        }
-
-        * {
-            box-sizing: border-box;
-            scroll-behavior: smooth;
-        }
-
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top left, #1f2937, #020617);
-            color: var(--text);
-        }
-
-        a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Layout */
-        header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(14px);
-            background: linear-gradient(to right, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.85));
-            border-bottom: 1px solid rgba(31, 41, 55, 0.8);
-        }
-
-        .nav {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0.75rem 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .nav-logo {
-            width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            background: radial-gradient(circle at 30% 30%, #38bdf8, #0ea5e9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #0b1220;
-            font-size: 1.1rem;
-        }
-
-        .nav-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        .nav-subtitle {
-            display: block;
-            font-size: 0.75rem;
-            color: var(--muted);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-            font-size: 0.85rem;
-        }
-
-        .nav-links a {
-            position: relative;
-            text-decoration: none;
-            color: var(--muted);
-            font-weight: 500;
-        }
-
-        .nav-links a::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            bottom: -0.2rem;
-            width: 0;
-            height: 2px;
-            background: var(--accent);
-            transition: width 0.18s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--text);
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .btn-outline {
-            border-radius: 999px;
-            border: 1px solid var(--accent);
-            padding: 0.4rem 0.9rem;
-            font-size: 0.8rem;
-            color: var(--accent);
-        }
-
-        .btn-outline:hover {
-            background: var(--accent-soft);
-        }
-
-        main {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2.5rem 1.25rem 3rem;
-        }
-
-        section {
-            margin-bottom: 3rem;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 0.75rem;
-        }
-
-        .section-divider {
-            width: 52px;
-            height: 2px;
-            background: linear-gradient(to right, var(--accent), transparent);
-            margin-bottom: 1.5rem;
-        }
-
-        /* Hero */
-        .hero {
-            display: grid;
-            grid-template-columns: minmax(0, 2.3fr) minmax(0, 1.7fr);
-            gap: 2rem;
-            align-items: center;
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-        }
-
-        .hero-title {
-            font-size: clamp(1.9rem, 3.2vw, 2.4rem);
-            font-weight: 700;
-            margin-bottom: 0.6rem;
-        }
-
-        .hero-highlight {
-            background: linear-gradient(to right, #38bdf8, #a855f7);
-            -webkit-background-clip: text;
-            color: transparent;
-        }
-
-        .hero-subtitle {
-            font-size: 0.95rem;
-            color: var(--muted);
-            max-width: 520px;
-            line-height: 1.5;
-        }
-
-        .hero-tags {
-            margin-top: 1.2rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag {
-            font-size: 0.75rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.7);
-            color: var(--muted);
-        }
-
-        .hero-actions {
-            margin-top: 1.4rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-
-        .btn-primary {
-            border-radius: 999px;
-            padding: 0.55rem 1.2rem;
-            border: none;
-            background: linear-gradient(135deg, #0ea5e9, #22c55e);
-            color: #0b1220;
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            opacity: 0.95;
-        }
-
-        .btn-ghost {
-            border-radius: 999px;
-            padding: 0.55rem 1.2rem;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.8);
-            color: var(--muted);
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .btn-ghost:hover {
-            border-color: var(--accent);
-            color: var(--text);
-        }
-
-        .hero-card {
-            border-radius: 1rem;
-            border: 1px solid var(--border);
-            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), rgba(15, 23, 42, 0.96));
-            padding: 1.4rem 1.3rem;
-        }
-
-        .hero-card h3 {
-            font-size: 0.95rem;
-            margin-top: 0;
-            margin-bottom: 0.7rem;
-        }
-
-        .hero-card p {
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-top: 0.2rem;
-            margin-bottom: 0.7rem;
-        }
-
-        .hero-meta {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 0.85rem;
-            margin-top: 0.7rem;
-        }
-
-        .meta-item {
-            font-size: 0.8rem;
-        }
-
-        .meta-label {
-            font-size: 0.75rem;
-            color: var(--muted);
-        }
-
-        .meta-value {
-            font-weight: 500;
-        }
-
-        /* Cards & lists */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.25rem;
-        }
-
-        .card {
-            border-radius: 0.9rem;
-            border: 1px solid var(--border);
-            background: rgba(15, 23, 42, 0.9);
-            padding: 1.1rem 1.1rem 1rem;
-        }
-
-        .card h3 {
-            margin-top: 0;
-            margin-bottom: 0.45rem;
-            font-size: 0.95rem;
-        }
-
-        .card p {
-            margin: 0;
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .pill-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.5rem;
-        }
-
-        .pill {
-            border-radius: 999px;
-            border: 1px solid var(--border);
-            padding: 0.2rem 0.55rem;
-            font-size: 0.72rem;
-            color: var(--muted);
-        }
-
-        /* Experience */
-        .experience-item {
-            margin-bottom: 1.2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(31, 41, 55, 0.7);
-        }
-
-        .experience-header {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 0.4rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .experience-role {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .experience-company {
-            font-size: 0.85rem;
-            color: var(--muted);
-        }
-
-        .experience-meta {
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .experience-list {
-            list-style: none;
-            padding-left: 0;
-            margin: 0.4rem 0 0;
-            font-size: 0.8rem;
-            color: var(--muted);
-        }
-
-        .experience-list li {
-            margin-bottom: 0.25rem;
-            position: relative;
-            padding-left: 1rem;
-        }
-
-        .experience-list li::before {
-            content: "•";
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-        }
-
-        /* Projects */
-        .project-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 1.25rem;
-        }
-
-        .project-card {
-            border-radius: 0.9rem;
-            border: 1px solid var(--border);
-            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.08), rgba(15, 23, 42, 0.95));
-            padding: 1.1rem;
-        }
-
-        .project-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .project-meta {
-            font-size: 0.75rem;
-            color: var(--muted);
-            margin-bottom: 0.4rem;
-        }
-
-        .project-desc {
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-bottom: 0.5rem;
-        }
-
-        .project-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-            font-size: 0.72rem;
-        }
-
-        .project-tag {
-            padding: 0.18rem 0.55rem;
-            border-radius: 999px;
-            border: 1px solid rgba(56, 189, 248, 0.4);
-            background: rgba(15, 23, 42, 0.9);
-            color: #bae6fd;
-        }
-
-        /* Contact */
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 2.2fr 1.8fr;
-            gap: 1.5rem;
-        }
-
-        .contact-item {
-            font-size: 0.85rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .contact-label {
-            font-size: 0.78rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--muted);
-        }
-
-        .contact-value {
-            font-size: 0.92rem;
-            font-weight: 500;
-        }
-
-        footer {
-            border-top: 1px solid rgba(31, 41, 55, 0.8);
-            padding: 1.1rem 1.25rem 1.4rem;
-            font-size: 0.75rem;
-            color: var(--muted);
-            text-align: center;
-            background: #020617;
-        }
-
-        /* Responsive */
-        @media (max-width: 900px) {
-
-            .hero,
-            .grid-2,
-            .project-grid,
-            .contact-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .nav {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 0.6rem;
-            }
-
-            .nav-links {
-                flex-wrap: wrap;
-                row-gap: 0.4rem;
-            }
-        }
-
-        @media (max-width: 600px) {
-            main {
-                padding-inline: 1rem;
-            }
-
-            .hero-card {
-                margin-top: 0.6rem;
-            }
-        }
-
-        .nav-left {
-            display: flex;
-            align-items: center;
-            /* Vertically centers the text with the photo */
-            gap: 1.5rem;
-            /* Space between photo and name */
-        }
-
-        .profile-container {
-            display: flex;
-            flex-shrink: 0;
-            /* Prevents the image from being squished */
-        }
-
-        .profile-pic {
-            width: 80px;
-            /* Adjusted size for Nav Bar - change to 100px if you want it bigger */
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid #007bff;
-            object-fit: cover;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .profile-pic:hover {
-            transform: scale(1.1);
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nelmar Dapulang — Full-Stack Developer &amp; Software Architect for Growing Businesses</title>
+<meta name="description" content="Nelmar Dapulang builds custom websites, mobile apps, and business systems — POS, dispatch, CRM, and automation — that help SMEs and startups run smoother and grow faster." />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Nelmar Dapulang — Full-Stack Developer & Software Architect" />
+<meta property="og:description" content="Custom websites, mobile apps, and business systems built to solve real operational problems — from dispatch platforms to POS systems." />
+<meta property="og:url" content="https://nelmardapulang.dev" />
+<meta property="og:image" content="https://nelmardapulang.dev/og-image.jpg" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Nelmar Dapulang — Full-Stack Developer & Software Architect" />
+<meta name="twitter:description" content="Custom websites, mobile apps, and business systems built to solve real operational problems." />
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Nelmar Dapulang",
+  "jobTitle": "Full-Stack Developer & Software Architect",
+  "email": "mailto:nelmardapulang@gmail.com",
+  "telephone": "+63-921-294-6607",
+  "address": {
+    "@type": "PostalAddress",
+    "addressRegion": "Cavite",
+    "addressCountry": "Philippines"
+  },
+  "knowsAbout": ["Laravel", "React", "Vue.js", "Node.js", "Python", "AWS", "Google Cloud Platform", "Mobile App Development", "System Architecture"]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-    <header>
-        <div class="nav">
-            <div class="nav-left">
-                <div>
-                    <div class="nav-title" style="font-weight: bold; font-size: 1.2rem;">Nelmar Dapulang</div>
-                    <span class="nav-subtitle" style="font-size: 0.85rem; color: #667;">Full-Stack Developer • System
-                        Architecture • Backend Engineering</span>
-                </div>
-            </div>
-            <nav class="nav-links">
-                <a href="#about">About</a>
-                <a href="#skills">Skills</a>
-                <a href="#experience">Experience</a>
-                <a href="#projects">Projects</a>
-                <a href="#contact">Contact</a>
-                <a href="#contact" class="btn-outline">Hire Me</a>
-            </nav>
+
+<div class="grain-overlay" aria-hidden="true"></div>
+
+<!-- ============ NAV ============ -->
+<header class="site-header" id="site-header">
+  <div class="wrap header-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="30" height="30"><circle cx="8" cy="8" r="3" fill="currentColor"/><circle cx="24" cy="8" r="3" fill="currentColor"/><circle cx="8" cy="24" r="3" fill="currentColor"/><circle cx="24" cy="24" r="3" fill="currentColor"/><path d="M8 11v10M24 11v10M11 8h10M11 24h10" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>
+      </span>
+      <span class="brand-text">Nelmar Dapulang</span>
+    </a>
+    <nav class="main-nav" aria-label="Primary">
+      <a href="#services">Services</a>
+      <a href="#process">Process</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact" class="nav-cta">Let's Talk</a>
+    </nav>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#services">Services</a>
+    <a href="#process">Process</a>
+    <a href="#projects">Projects</a>
+    <a href="#experience">Experience</a>
+    <a href="#contact" class="nav-cta">Let's Talk</a>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-mesh" aria-hidden="true"></div>
+  <svg class="hero-blueprint" viewBox="0 0 1200 800" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+    <g class="blueprint-grid">
+      <line x1="0" y1="120" x2="1200" y2="120"/><line x1="0" y1="280" x2="1200" y2="280"/>
+      <line x1="0" y1="440" x2="1200" y2="440"/><line x1="0" y1="600" x2="1200" y2="600"/>
+      <line x1="200" y1="0" x2="200" y2="800"/><line x1="500" y1="0" x2="500" y2="800"/>
+      <line x1="800" y1="0" x2="800" y2="800"/><line x1="1050" y1="0" x2="1050" y2="800"/>
+    </g>
+    <g class="blueprint-nodes">
+      <circle cx="200" cy="120" r="4"/><circle cx="800" cy="280" r="4"/>
+      <circle cx="500" cy="440" r="4"/><circle cx="1050" cy="600" r="4"/>
+      <circle cx="200" cy="600" r="4"/><circle cx="800" cy="120" r="4"/>
+      <path d="M200 120 L500 120 L500 440" fill="none"/>
+      <path d="M800 280 L800 600 L1050 600" fill="none"/>
+      <path d="M200 600 L200 440 L500 440" fill="none"/>
+    </g>
+  </svg>
+
+  <div class="wrap hero-inner">
+    <div class="hero-copy reveal">
+      <span class="eyebrow">Software Development Studio · One Developer, Full Ownership</span>
+      <h1>Software that runs your business, so you don't have to run it manually.</h1>
+      <p class="hero-lead">I design and build websites, mobile apps, and custom business systems — POS, dispatch, billing, CRM — for owners who are tired of spreadsheets, missed bookings, and tools that don't talk to each other. Nine years turning operational headaches into software that just works.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">Let's Build Your Project</a>
+        <a href="#experience" class="btn btn-ghost">View My Experience</a>
+      </div>
+      <div class="hero-meta">
+        <div class="hero-avatar" aria-hidden="true">ND</div>
+        <p>Based in Cavite, Philippines — working with teams in the US, Korea, and Germany.</p>
+      </div>
+    </div>
+    <div class="hero-panel reveal" aria-hidden="true">
+      <div class="panel-card panel-card--main">
+        <div class="panel-dot-row"><span></span><span></span><span></span></div>
+        <div class="panel-line panel-line--head"></div>
+        <div class="panel-line"></div>
+        <div class="panel-line panel-line--short"></div>
+        <div class="panel-chip-row">
+          <span class="panel-chip">Laravel</span><span class="panel-chip">React Native</span><span class="panel-chip">AWS</span>
         </div>
-    </header>
+        <div class="panel-graph">
+          <svg viewBox="0 0 240 70"><polyline points="0,55 30,45 60,50 90,30 120,35 150,15 180,20 210,8 240,12" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+        </div>
+      </div>
+      <div class="panel-card panel-card--float-1">
+        <i data-lucide="check-circle-2"></i>
+        <div><strong>Deployed</strong><span>Live on GCP</span></div>
+      </div>
+      <div class="panel-card panel-card--float-2">
+        <i data-lucide="shield-check"></i>
+        <div><strong>Secured</strong><span>Auth &amp; SSL configured</span></div>
+      </div>
+    </div>
+  </div>
+  <a href="#trust" class="scroll-cue" aria-label="Scroll to content">
+    <i data-lucide="chevron-down"></i>
+  </a>
+</section>
 
-    <main>
-        <!-- Hero / About -->
-        <section id="about">
-            <div class="hero">
-                <div>
-                    <h1 class="hero-title">
-                        Full-Stack Developer focused on
-                        <span class="hero-highlight">scalable systems & long-term growth</span>.
-                    </h1>
-                    <p class="hero-subtitle">
-                        I design and build robust, production-ready web applications with a strong focus on backend
-                        architecture, data integrity, and maintainable code. I’ve worked with international teams across
-                        the US, Korea, and Europe, delivering solutions in accounting, HR, automation, and custom
-                        business systems.
-                    </p>
+<!-- ============ TRUST STRIP ============ -->
+<section class="trust" id="trust">
+  <div class="wrap trust-grid">
+    <div class="trust-card reveal">
+      <span class="trust-number" data-count="20">0</span><span class="trust-suffix">+</span>
+      <p>Years in technology, from hands-on hardware to cloud architecture</p>
+    </div>
+    <div class="trust-card reveal">
+      <span class="trust-number" data-count="9">0</span><span class="trust-suffix">+</span>
+      <p>Years designing and shipping full-stack software</p>
+    </div>
+    <div class="trust-card reveal">
+      <span class="trust-number" data-count="8">0</span><span class="trust-suffix">+</span>
+      <p>Industries served, from logistics to fintech to utilities</p>
+    </div>
+    <div class="trust-card reveal">
+      <span class="trust-number" data-count="15">0</span><span class="trust-suffix">+</span>
+      <p>Technologies used in production, chosen for the job at hand</p>
+    </div>
+  </div>
+</section>
 
-                    <div class="hero-tags">
-                        <span class="tag">Full-Stack Development</span>
-                        <span class="tag">System Architecture</span>
-                        <span class="tag">Backend Engineering</span>
-                        <span class="tag">Remote & Distributed Teams</span>
-                    </div>
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <div class="wrap about-grid">
+    <div class="about-visual reveal" aria-hidden="true">
+      <div class="about-frame">
+        <div class="about-frame-row">
+          <i data-lucide="database"></i><span>Structured data, done right</span>
+        </div>
+        <div class="about-frame-row">
+          <i data-lucide="lock"></i><span>Secure by default</span>
+        </div>
+        <div class="about-frame-row">
+          <i data-lucide="gauge"></i><span>Built to stay fast at scale</span>
+        </div>
+        <div class="about-frame-row">
+          <i data-lucide="life-buoy"></i><span>Supported after launch</span>
+        </div>
+      </div>
+    </div>
+    <div class="about-copy reveal">
+      <span class="eyebrow">About</span>
+      <h2>I build the systems behind the business, not just the screens on top.</h2>
+      <p>Most developers hand you a website and disappear. I come from the operations side too — I've managed payroll, trained staff, run IT infrastructure, and kept a company's internal systems online day to day. That means I design software around how your business actually runs, not just how it looks in a demo.</p>
+      <p>Every project starts with your bottleneck — manual bookings, disconnected spreadsheets, a website that doesn't convert — and ends with a system that's fast, secure, and built to still be working in three years, not three months.</p>
+      <ul class="about-points">
+        <li><i data-lucide="check"></i> Business automation that removes manual, repetitive work</li>
+        <li><i data-lucide="check"></i> Websites and apps built to convert visitors into customers</li>
+        <li><i data-lucide="check"></i> Custom systems that scale as your business grows</li>
+        <li><i data-lucide="check"></i> Long-term support, not a one-time handoff</li>
+      </ul>
+    </div>
+  </div>
+</section>
 
-                    <div class="hero-actions">
-                        <a href="#projects" class="btn-primary">View Highlight Projects</a>
-                        <a href="#experience" class="btn-ghost">See Experience</a>
-                    </div>
-                </div>
+<!-- ============ SERVICES ============ -->
+<section class="services" id="services">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Services</span>
+      <h2>What I build for you</h2>
+      <p class="section-lead">Skills translated into outcomes — every service below maps to a business problem I've solved before.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-icon"><i data-lucide="globe"></i></div>
+        <h3>Business Website Development</h3>
+        <p>Custom websites that build credibility and turn visitors into customers — built from scratch, not a page builder template.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon"><i data-lucide="smartphone"></i></div>
+        <h3>Mobile Application Development</h3>
+        <p>Android and cross-platform apps that let your team and your customers manage things on the move, with GPS, maps, and live tracking when you need it.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon"><i data-lucide="settings-2"></i></div>
+        <h3>Custom Business Systems</h3>
+        <p>POS, billing, dispatch, and back-office platforms built around how your team actually works — not generic off-the-shelf software.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon"><i data-lucide="cloud"></i></div>
+        <h3>Cloud Deployment &amp; DevOps</h3>
+        <p>Secure hosting on AWS and Google Cloud, automated deployments, backups, and SSL — set up once, running reliably after.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon"><i data-lucide="shield"></i></div>
+        <h3>System Security</h3>
+        <p>Authentication, access control, and secure architecture, backed by certified ethical hacking and penetration testing knowledge.</p>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-icon"><i data-lucide="workflow"></i></div>
+        <h3>Automation &amp; Reporting</h3>
+        <p>Custom tools that scrape, normalize, and report on your data automatically — replacing hours of manual entry with a dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
 
-                <aside class="hero-card">
-                    <h3>At a Glance</h3>
-                    <p>
-                        Fast, self-directed learner with a strong track record of owning features end-to-end —
-                        from requirements and architecture to deployment and optimization.
-                    </p>
-                    <div class="hero-meta">
-                        <div class="meta-item">
-                            <div class="meta-label">Location</div>
-                            <div class="meta-value">Carmona, Cavite (PH)</div>
-                        </div>
-                        <div class="meta-item">
-                            <div class="meta-label">Experience</div>
-                            <div class="meta-value">10+ years in software & IT</div>
-                        </div>
-                        <div class="meta-item">
-                            <div class="meta-label">Current Focus</div>
-                            <div class="meta-value">Career growth & complex systems</div>
-                        </div>
-                        <div class="meta-item">
-                            <div class="meta-label">Available For</div>
-                            <div class="meta-value">Remote / Hybrid roles & projects</div>
-                        </div>
-                    </div>
-                </aside>
-            </div>
-        </section>
+<!-- ============ PROCESS ============ -->
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">My Process</span>
+      <h2>How a project actually gets built</h2>
+      <p class="section-lead">The same architecture-first process I use to design production systems — applied to your project.</p>
+    </div>
+    <div class="pipeline reveal">
+      <svg class="pipeline-line" viewBox="0 0 1000 40" preserveAspectRatio="none" aria-hidden="true">
+        <line x1="0" y1="20" x2="1000" y2="20" />
+      </svg>
+      <div class="pipeline-steps">
+        <div class="pipeline-step">
+          <div class="pipeline-node"><i data-lucide="search"></i></div>
+          <h3>Discovery</h3>
+          <p>Understand your business, your bottleneck, and what "done" looks like.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node"><i data-lucide="ruler"></i></div>
+          <h3>Planning</h3>
+          <p>Design the architecture and map out the solution before writing code.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node"><i data-lucide="code-2"></i></div>
+          <h3>Development</h3>
+          <p>Build clean, scalable software using tested, maintainable practices.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node"><i data-lucide="flask-conical"></i></div>
+          <h3>Testing</h3>
+          <p>Automated and manual testing to make sure it holds up in the real world.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node"><i data-lucide="rocket"></i></div>
+          <h3>Deployment</h3>
+          <p>Launch to production on secure, monitored cloud infrastructure.</p>
+        </div>
+        <div class="pipeline-step">
+          <div class="pipeline-node"><i data-lucide="life-buoy"></i></div>
+          <h3>Support</h3>
+          <p>Ongoing improvements and fixes — I stay involved after launch.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <!-- Skills -->
-        <section id="skills">
-            <div class="section-title">Skills</div>
-            <div class="section-divider"></div>
-            <div class="grid-2">
-                <div class="card">
-                    <h3>Core Technical Stack</h3>
-                    <p>Backend technologies and database management for scalable systems.</p>
-                    <div class="pill-row">
-                        <span class="pill">Laravel 12</span>
-                        <span class="pill">PHP / OOP</span>
-                        <span class="pill">Node.js</span>
-                        <span class="pill">MongoDB / Atlas</span>
-                        <span class="pill">MySQL</span>
-                        <span class="pill">Python</span>
-                        <span class="pill">Firebase</span>
-                        <span class="pill">REST APIs</span>
-                        <span class="pill">Cloudflare</span>
-                    </div>
-                </div>
+<!-- ============ TECH STACK ============ -->
+<section class="stack" id="stack">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Technology</span>
+      <h2>The tools behind the solution</h2>
+      <p class="section-lead">Chosen for reliability and fit, not novelty. Grouped by what each layer does for your project.</p>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-col reveal">
+        <h4><i data-lucide="layout-panel-left"></i> Frontend</h4>
+        <ul><li>React.js</li><li>Vue.js</li><li>Livewire</li></ul>
+      </div>
+      <div class="stack-col reveal">
+        <h4><i data-lucide="server"></i> Backend</h4>
+        <ul><li>Laravel</li><li>CodeIgniter</li><li>Node.js</li><li>Python</li></ul>
+      </div>
+      <div class="stack-col reveal">
+        <h4><i data-lucide="database"></i> Database</h4>
+        <ul><li>MySQL</li><li>PostgreSQL</li><li>MongoDB</li><li>Firebase</li></ul>
+      </div>
+      <div class="stack-col reveal">
+        <h4><i data-lucide="cloud-cog"></i> Cloud &amp; DevOps</h4>
+        <ul><li>AWS</li><li>Google Cloud</li><li>Docker</li><li>GitHub Actions</li><li>Cloudflare</li></ul>
+      </div>
+      <div class="stack-col reveal">
+        <h4><i data-lucide="smartphone"></i> Mobile</h4>
+        <ul><li>React Native</li><li>Android (Java)</li></ul>
+      </div>
+      <div class="stack-col reveal">
+        <h4><i data-lucide="wrench"></i> Tools &amp; QA</h4>
+        <ul><li>Python Playwright</li><li>Jira</li><li>Git</li><li>TDD / BDD</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
 
-                <div class="card">
-                    <h3>Frontend & Mobile</h3>
-                    <p>Creating seamless user experiences across web and mobile platforms.</p>
-                    <div class="pill-row">
-                        <span class="pill">React</span>
-                        <span class="pill">React Native</span>
-                        <span class="pill">Vue.js</span>
-                        <span class="pill">Livewire</span>
-                        <span class="pill">Tailwind / Bootstrap</span>
-                        <span class="pill">Blade / HTML</span>
-                        <span class="pill">Responsive Design</span>
-                    </div>
-                </div>
+<!-- ============ PROJECTS ============ -->
+<section class="projects" id="projects">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Featured Projects</span>
+      <h2>Real problems, real systems</h2>
+      <p class="section-lead">A closer look at business problems I've solved end-to-end — from architecture to deployment.</p>
+    </div>
+    <div class="projects-grid">
+      <article class="project-card reveal">
+        <div class="project-tag">Logistics &amp; Field Service</div>
+        <h3>Dispatch Platform — Kalibre Aircon Services</h3>
+        <p class="project-problem"><strong>The problem:</strong> No way to dispatch technicians in real time, track them in the field, or take live bookings online.</p>
+        <p class="project-solution"><strong>The solution:</strong> A full-stack, Uber-style dispatch system — Laravel and MySQL backend with custom APIs, and a React Native Android app with GPS and live map tracking for drivers.</p>
+        <div class="project-tech">
+          <span>Laravel</span><span>MySQL</span><span>React Native</span><span>Google Maps API</span><span>GCP / AWS</span>
+        </div>
+        <p class="project-impact"><i data-lucide="trending-up"></i> Enables live bookings, real-time dispatch, and automated notifications — deployed with CI/CD for continuous updates.</p>
+        <div class="project-links">
+          <a href="https://kalibre.com.ph" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Live Site</a>
+          <a href="#" class="is-placeholder" aria-disabled="true"><i data-lucide="github"></i> Repository (private)</a>
+        </div>
+      </article>
 
-                <div class="card">
-                    <h3>Systems & Architecture</h3>
-                    <p>Designing the blueprint for robust, maintainable software applications.</p>
-                    <div class="pill-row">
-                        <span class="pill">Software Architecture</span>
-                        <span class="pill">Draw.io / Lucidchart</span>
-                        <span class="pill">Database Design</span>
-                        <span class="pill">System Workflows</span>
-                        <span class="pill">Git / GitHub</span>
-                        <span class="pill">Agile Collaboration</span>
-                        <span class="pill">Technical Documentation</span>
-                    </div>
-                </div>
+      <article class="project-card reveal">
+        <div class="project-tag">Utilities &amp; Billing</div>
+        <h3>POS &amp; Billing System — JMJ Business Water System</h3>
+        <p class="project-problem"><strong>The problem:</strong> A local water co-op was managing billing, ticket issuance, and accounts manually, with no central reporting.</p>
+        <p class="project-solution"><strong>The solution:</strong> A custom POS and billing platform with a Laravel and MySQL backend for transactions and reports, plus a Vue.js cashier dashboard with QR-code billing and automated receipts.</p>
+        <div class="project-tech">
+          <span>Laravel</span><span>MySQL</span><span>Vue.js</span><span>QR Billing</span>
+        </div>
+        <p class="project-impact"><i data-lucide="trending-up"></i> Replaced manual ticketing with an auditable digital system, cutting billing errors and speeding up the counter.</p>
+        <div class="project-links">
+          <a href="https://jmjbusiness.com" target="_blank" rel="noopener"><i data-lucide="external-link"></i> Live Site</a>
+          <a href="#" class="is-placeholder" aria-disabled="true"><i data-lucide="github"></i> Repository (private)</a>
+        </div>
+      </article>
 
-                <div class="card">
-                    <h3>Physical Systems & Engineering</h3>
-                    <p>Experience in electrical systems, automation, and technical drafting.</p>
-                    <div class="pill-row">
-                        <span class="pill">AutoCAD Drafting</span>
-                        <span class="pill">House Automation</span>
-                        <span class="pill">CCTV Systems</span>
-                        <span class="pill">FDAS (Fire Detection)</span>
-                        <span class="pill">Security Alarm Systems</span>
-                        <span class="pill">Electrical / Electronics</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+      <article class="project-card reveal">
+        <div class="project-tag">Ground-Up Systems</div>
+        <h3>Company Website &amp; Internal Operations Platform — P-VES / Schumacher Philippines</h3>
+        <p class="project-problem"><strong>The problem:</strong> The company had no public website and no internal system to run daily operations.</p>
+        <p class="project-solution"><strong>The solution:</strong> Designed and built both the public website and an internal operations platform from the ground up — architecture, development, and deployment, end to end.</p>
+        <div class="project-tech">
+          <span>Systems Architecture</span><span>Web Development</span><span>IT Infrastructure</span>
+        </div>
+        <p class="project-impact"><i data-lucide="trending-up"></i> Gave the company its first digital presence and a working internal platform still used to run operations.</p>
+        <div class="project-links">
+          <a href="#" class="is-placeholder" aria-disabled="true"><i data-lucide="external-link"></i> Demo on request</a>
+          <a href="#" class="is-placeholder" aria-disabled="true"><i data-lucide="github"></i> Repository (private)</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
 
-        <!-- Experience -->
-        <section id="experience">
-            <div class="section-title">Work History</div>
-            <div class="section-divider"></div>
+<!-- ============ WHY CHOOSE ME ============ -->
+<section class="why" id="why">
+  <div class="wrap why-grid">
+    <div class="why-copy reveal">
+      <span class="eyebrow">Why Work With Me</span>
+      <h2>You're not just hiring a developer. You're hiring someone who owns the outcome.</h2>
+      <p>I've led engineering teams, managed operations, and supported systems long after launch — so I build with the whole picture in mind, not just the ticket in front of me.</p>
+      <a href="#contact" class="btn btn-primary">Start a Conversation</a>
+    </div>
+    <div class="why-grid-cards">
+      <div class="why-card reveal"><i data-lucide="message-circle"></i><h4>Reliable Communication</h4><p>Clear updates, no disappearing for weeks at a time.</p></div>
+      <div class="why-card reveal"><i data-lucide="layers"></i><h4>Clean Architecture</h4><p>Service and repository patterns that keep code maintainable.</p></div>
+      <div class="why-card reveal"><i data-lucide="trending-up"></i><h4>Scalable Solutions</h4><p>Built to handle growth, not just today's traffic.</p></div>
+      <div class="why-card reveal"><i data-lucide="briefcase"></i><h4>Business-First Thinking</h4><p>I've run operations myself, so I design for real workflows.</p></div>
+      <div class="why-card reveal"><i data-lucide="wrench"></i><h4>Long-Term Maintenance</h4><p>I stay on after launch to fix, improve, and support.</p></div>
+      <div class="why-card reveal"><i data-lucide="gauge"></i><h4>Performance Optimization</h4><p>Refactoring and tuning so software stays fast under load.</p></div>
+      <div class="why-card reveal"><i data-lucide="puzzle"></i><h4>Problem Solving</h4><p>From electronics repair to cloud architecture — I figure it out.</p></div>
+      <div class="why-card reveal"><i data-lucide="file-text"></i><h4>Professional Documentation</h4><p>Process docs and workflows so your team isn't left guessing.</p></div>
+    </div>
+  </div>
+</section>
 
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Full-Stack Developer</div>
-                        <div class="experience-company">Tabulate LLC / Premium Designscape LLC — New Jersey, USA (WFH)
-                        </div>
-                    </div>
-                    <div class="experience-meta">2023 – 2025</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Led full-stack development and system architecture for accounting, payroll, and HR platforms.
-                    </li>
-                    <li>Designed database schemas and process workflows to support scalable multi-module systems.</li>
-                    <li>Owned implementation quality, ensuring clean, secure, and maintainable code across backend and
-                        frontend.</li>
-                    <li>Supported hiring and onboarding of developers, contributing to team capability and growth.</li>
-                </ul>
-            </div>
+<!-- ============ EXPERIENCE ============ -->
+<section class="experience" id="experience">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Experience</span>
+      <h2>Where this expertise comes from</h2>
+    </div>
+    <div class="timeline">
+      <div class="timeline-item reveal">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <span class="timeline-date">Feb 2023 — Oct 2025</span>
+          <h3>Lead Full Stack Developer &amp; Project Manager</h3>
+          <span class="timeline-company">Tabulate LLC · Remote (New Jersey)</span>
+          <p>Led a 10-person engineering team across backend, frontend, cloud, security, and mobile — owning sprint planning, risk management, and stakeholder communication end to end. Also served as the operations liaison between ownership and staff, managing attendance, verification, and payroll.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <span class="timeline-date">Sep 2022 — Mar 2024</span>
+          <h3>Full Stack Developer</h3>
+          <span class="timeline-company">Unitech Ltd &amp; Licorne Ltd. · Remote (Korea)</span>
+          <p>Built a custom C# automation tool that cut manual workload for operations and finance teams. Led the migration of an admin dashboard from vanilla PHP to CodeIgniter 4, and developed a data-scraping backend that gave stakeholders real-time reporting.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <span class="timeline-date">Jun 2016 — Feb 2021</span>
+          <h3>Lead Systems Designer &amp; IT Support Specialist</h3>
+          <span class="timeline-company">P-VES / Schumacher Philippines · Bel-Air, Sta. Rosa, Laguna</span>
+          <p>Founded and built the company's core systems from scratch, including its public website and internal operations platform. Managed company-wide operations, process documentation, and onboarding, while overseeing the full IT and security infrastructure.</p>
+        </div>
+      </div>
+      <div class="timeline-item reveal">
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+          <span class="timeline-date">2004 — 2022</span>
+          <h3>Early Career — Freelance Development &amp; Technical Specialist</h3>
+          <span class="timeline-company">NatoCatering · NFG Stock Trading (Germany) · Vendtap Inc (USA) · Multiple IT/Electronics Employers</span>
+          <p>Built a Java and Firebase Android app for NatoCatering; delivered backend features and reliability fixes for a German stock-trading firm and a US-based startup. Before that, a decade in hardware diagnostics, network infrastructure, and system troubleshooting across transit, real estate, and electronics companies.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Full-Stack Developer</div>
-                        <div class="experience-company">Unitech Ltd & Licorne Ltd — Korean Company (WFH)</div>
-                    </div>
-                    <div class="experience-meta">2022 – 2023</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Built and maintained backend infrastructures using CodeIgniter (PHP), Python, and C#.</li>
-                    <li>Developed automated casino and sports-betting systems with prediction, odds, and payout logic.
-                    </li>
-                    <li>Integrated automation modules into CRM platforms for consistent user tracking and analytics.
-                    </li>
-                </ul>
-            </div>
+<!-- ============ EDUCATION ============ -->
+<section class="education" id="education">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">Education &amp; Certifications</span>
+      <h2>Formal training, backed by two decades of practice</h2>
+    </div>
+    <div class="edu-grid">
+      <div class="edu-card reveal">
+        <i data-lucide="graduation-cap"></i>
+        <div>
+          <h4>Applied Computer Science</h4>
+          <span>Imus Computer College · 2022–2023</span>
+        </div>
+      </div>
+      <div class="edu-card reveal">
+        <i data-lucide="badge-check"></i>
+        <div>
+          <h4>Ethical Hacking &amp; Pentesting Certification</h4>
+          <span>MST Connect · 2022</span>
+        </div>
+      </div>
+      <div class="edu-card reveal">
+        <i data-lucide="badge-check"></i>
+        <div>
+          <h4>Consumer Electronics &amp; AV Servicing</h4>
+          <span>TESDA Certification · 2003</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Software Backend Developer (Freelance)</div>
-                        <div class="experience-company">NFG Stock Trading — Germany (Remote)</div>
-                    </div>
-                    <div class="experience-meta">2022</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Collaborated with cross-functional teams to design and implement new backend features.</li>
-                    <li>Diagnosed and resolved production issues, improving stability and performance.</li>
-                </ul>
-            </div>
+<!-- ============ CONTACT ============ -->
+<section class="contact" id="contact">
+  <div class="wrap">
+    <div class="contact-panel reveal">
+      <div class="contact-mesh" aria-hidden="true"></div>
+      <div class="contact-content">
+        <span class="eyebrow eyebrow--light">Get In Touch</span>
+        <h2>Let's build something amazing together.</h2>
+        <p>Tell me what's slowing your business down — I'll tell you honestly whether software is the fix, and what it would take to build it.</p>
+        <a href="mailto:nelmardapulang@gmail.com" class="btn btn-light">
+          <i data-lucide="mail"></i> nelmardapulang@gmail.com
+        </a>
+        <div class="contact-links">
+          <a href="tel:+639212946607"><i data-lucide="phone"></i> 0921 294 6607</a>
+          <a href="#" class="is-placeholder"><i data-lucide="linkedin"></i> LinkedIn</a>
+          <a href="#" class="is-placeholder"><i data-lucide="github"></i> GitHub</a>
+          <a href="#" class="is-placeholder"><i data-lucide="facebook"></i> Facebook</a>
+          <span><i data-lucide="map-pin"></i> Cavite, Philippines</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Software Backend Developer</div>
-                        <div class="experience-company">Vendtap Inc — New York, USA (Remote)</div>
-                    </div>
-                    <div class="experience-meta">2022</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Implemented backend features in Laravel aligned with evolving business requirements.</li>
-                    <li>Improved reliability and maintainability through refactoring and performance tuning.</li>
-                </ul>
-            </div>
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <span>&copy; 2026 Nelmar Dapulang. Built with Laravel-grade care.</span>
+    <a href="#top">Back to top ↑</a>
+  </div>
+</footer>
 
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Software Developer</div>
-                        <div class="experience-company">Schumacher Elevator Zhangjiagang Inc. — Sta. Rosa, Laguna</div>
-                    </div>
-                    <div class="experience-meta">2019 – 2021</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Led deployment of access control, CCTV, and security system integrations.</li>
-                    <li>Managed IT operations and built internal web applications to streamline workflows.</li>
-                </ul>
-            </div>
-
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Software Developer & IT Operations</div>
-                        <div class="experience-company">P-Vision Electronic Solutions Inc. — Sta. Rosa, Laguna</div>
-                    </div>
-                    <div class="experience-meta">2016 – 2019</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Oversaw IT support, network, and systems, ensuring uptime and smooth operations.</li>
-                    <li>Developed internal systems that improved efficiency and reporting.</li>
-                </ul>
-            </div>
-
-            <div class="experience-item">
-                <div class="experience-header">
-                    <div>
-                        <div class="experience-role">Other Technical Experience</div>
-                        <div class="experience-company">Nato Catering, Moderntech Computer System Inc., P.A. Builders
-                        </div>
-                    </div>
-                    <div class="experience-meta">2009 – 2019</div>
-                </div>
-                <ul class="experience-list">
-                    <li>Android app development with Firebase integration for real-time features.</li>
-                    <li>Technical support and electronics repair for computers, peripherals, and servers.</li>
-                    <li>Master Electrician and project foreman for residential and commercial electrical projects.</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- Projects -->
-        <section id="projects">
-            <div class="section-title">Projects</div>
-            <div class="section-divider"></div>
-
-            <div class="project-grid">
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://atsnemt.com/" target="_blank" rel="noopener" class="project-link">
-                                <div class="project-title">Technical WordPress Management & Optimization 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Client Project • WordPress / PHP / SEO</div>
-                        <p class="project-desc">
-                            Directed technical maintenance and performance scaling for a high-traffic WordPress site.
-                            Implemented <strong>custom API integrations</strong> to sync external data,
-                            optimized site architecture for <strong>SEO performance</strong>, and managed
-                            automated backup and security protocols.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">API Integration</span>
-                            <span class="project-tag">SEO Optimization</span>
-                            <span class="project-tag">Site Maintenance</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                             <a href="https://dev.trustilink.com/login" target="_blank" rel="noopener" class="project-link">
-                                <div class="project-title">Centralized Multi-Tenant CRM & CMS 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Architecture • Laravel / SiteGround / PHP</div>
-                        <p class="project-desc">
-                            Engineered a centralized <strong>Omni-channel CMS</strong> hosted on SiteGround to manage
-                            content for multiple external platforms. Integrated a full-scale CRM module for
-                            <strong>quotations and dispatch logistics</strong>, utilizing optimized MySQL
-                            databases and custom mail server configurations for high-volume business workflows.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Multi-Site Management</span>
-                            <span class="project-tag">Logistics Engine</span>
-                            <span class="project-tag">SiteGround Optimization</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://tabulatecrm.com" target="_blank" rel="noopener" class="project-link">
-                                <div class="project-title">Enterprise SaaS Analytics Platform 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Proprietary Client Project • Laravel / ReactJS / GCP</div>
-                        <p class="project-desc">
-                            Architected and deployed a multi-tenant SaaS solution for enterprise data tracking.
-                            Developed a robust API layer using Laravel, a reactive frontend with ReactJS, and managed
-                            scalable infrastructure on GCP.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Multi-Tenancy</span>
-                            <span class="project-tag">Cloud Infrastructure</span>
-                            <span class="project-tag">Enterprise Security</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://premiumdesignscape.com" target="_blank" rel="noopener"
-                                class="project-link">
-                                <div class="project-title">Integrated Service & Logistics SaaS 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Hybrid Stack • Laravel / React Native / AdminLTE</div>
-                        <p class="project-desc">
-                            Developed an end-to-end CRM and field service solution. Features a robust AdminLTE-driven
-                            back-office for managing estimates, inventory, and dispatches, synced with a React Native
-                            mobile app.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Inventory Management</span>
-                            <span class="project-tag">Field Dispatching</span>
-                            <span class="project-tag">Cross-Platform Sync</span>
-                        </div>
-                    </div>
-                </article>
-
-
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://sch-elevator.com.ph" target="_blank" rel="noopener"
-                                class="project-link">
-                                <div class="project-title">Corporate Web Platform: Schumacher Elevator 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Client Project • Laravel / Bootstrap</div>
-                        <p class="project-desc">
-                            Engineered a comprehensive corporate presence and custom CMS. Managed
-                            <strong>enterprise email configuration</strong> and SMTP integration for
-                            automated inquiries, alongside a secure Laravel-based admin panel for
-                            managing service offerings and project portfolios.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Custom CMS</span>
-                            <span class="project-tag">Email SMTP Config</span>
-                            <span class="project-tag">Enterprise Web</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://technoacers.com/" target="_blank" rel="noopener" class="project-link">
-                                <div class="project-title">TechnoAcers: Corporate Website 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Client Project • PHP / Bootstrap / Custom CMS</div>
-                        <p class="project-desc">
-                            Developed a responsive corporate platform following strict client design assets.
-                            Configured <strong>custom mail server protocols</strong> for lead generation forms
-                            and built a simplified PHP/Bootstrap CMS for efficient content and
-                            communication management.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">PHP/MySQL</span>
-                            <span class="project-tag">Mail Server Setup</span>
-                            <span class="project-tag">Bootstrap</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://kalibre.com.ph" target="_blank" rel="noopener" class="project-link">
-                                <div class="project-title">Ka Libre: Integrated Service Ecosystem 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Hybrid Stack • Laravel / React Native / AdminLTE</div>
-                        <p class="project-desc">
-                            Engineered a cross-platform service ecosystem featuring a <strong>React Native</strong>
-                            mobile application
-                            for end-users and a robust <strong>AdminLTE</strong> dashboard for back-office operations.
-                            Configured the full <strong>email infrastructure and SMTP protocols</strong> for automated
-                            notifications and secure user communication.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Mobile App</span>
-                            <span class="project-tag">Email Config</span>
-                            <span class="project-tag">Full-Stack Sync</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <a href="https://youtu.be/JFgkClO2H8A" target="_blank" rel="noopener"
-                                class="project-link">
-                                <div class="project-title">Automated Betting Engine 🔗</div>
-                            </a>
-                        </div>
-                        <div class="project-meta">Backend • CodeIgniter / Python / C#</div>
-                        <p class="project-desc">
-                            Designed and implemented a backend engine for automated casino and sports wagering,
-                            including prediction logic, wagering cycles, odds computation, and real-time payout
-                            monitoring.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">High-Throughput Logic</span>
-                            <span class="project-tag">Automation</span>
-                            <span class="project-tag">Complex Business Rules</span>
-                        </div>
-                    </div>
-                </article>
-
-
-            </div>
-        </section>
-
-        <section id="indie-projects" style="margin-top: 50px;">
-            <div class="section-title">Indie Projects</div>
-            <div class="section-divider"></div>
-
-            <div class="project-grid">
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <div class="project-title">QR-Based Time Management</div>
-                        </div>
-                        <div class="project-meta">Web App • PHP / MySQL</div>
-                        <p class="project-desc">
-                            Developed a QR-powered attendance tracking system for university students, with secure
-                            scanning, logging, and reporting to support faculty and administrative workflows.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">PHP</span>
-                            <span class="project-tag">QR Code</span>
-                            <span class="project-tag">Education</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <div class="project-title">Clinic Scheduling System</div>
-                        </div>
-                        <div class="project-meta">Web App • PHP / MySQL</div>
-                        <p class="project-desc">
-                            Created a clinic scheduling application to manage appointments, time slots, and patient
-                            queues, improving visibility and reducing scheduling conflicts.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Scheduling</span>
-                            <span class="project-tag">Role-Based Flows</span>
-                            <span class="project-tag">Operational Efficiency</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <div class="project-title">QR-Sync Attendance System</div>
-                        </div>
-                        <div class="project-meta">Indie Project • PHP / MySQL</div>
-                        <p class="project-desc">
-                            Developed a QR-powered attendance tracking system for university environments.
-                            Implemented secure scanning, real-time logging, and automated reporting
-                            to streamline administrative workflows.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">QR Automation</span>
-                            <span class="project-tag">PHP/MySQL</span>
-                            <span class="project-tag">Workflow Optimization</span>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="project-card">
-                    <div class="project-content">
-                        <div class="project-header">
-                            <div class="project-title">Clinic Operations & Scheduling</div>
-                        </div>
-                        <div class="project-meta">Indie Project • PHP / MySQL</div>
-                        <p class="project-desc">
-                            Created a comprehensive clinic management tool to handle appointments,
-                            patient queues, and time-slot availability, significantly reducing
-                            manual scheduling conflicts.
-                        </p>
-                    </div>
-                    <div class="project-footer">
-                        <div class="project-tags">
-                            <span class="project-tag">Role-Based Access</span>
-                            <span class="project-tag">Database Design</span>
-                            <span class="project-tag">Healthcare Tech</span>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- Contact -->
-        <section id="contact">
-            <div class="section-title">Contact</div>
-            <div class="section-divider"></div>
-
-            <div class="contact-grid">
-                <div>
-                    <p style="font-size:0.9rem;color:var(--muted);max-width:460px;">
-                        I’m open to opportunities where I can contribute to complex systems, help shape architecture,
-                        and continue growing as a full-stack engineer. If my experience matches what you’re building,
-                        feel free to reach out.
-                    </p>
-
-                    <div class="contact-item">
-                        <div class="contact-label">Email</div>
-                        <div class="contact-value">
-                            <a href="mailto:nelmardapulang@gmail.com">nelmardapulang@gmail.com</a>
-                        </div>
-                    </div>
-
-                    <div class="contact-item">
-                        <div class="contact-label">WhatsApp / Viber / Mobile</div>
-                        <div class="contact-value">
-                            <a href="https://wa.me/639212946607" target="_blank">+63 921 294 6607</a>
-                        </div>
-                    </div>
-
-                    <div class="contact-item">
-                        <div class="contact-label">Location</div>
-                        <div class="contact-value">Carmona, Cavite, Philippines</div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="contact-item">
-                        <div class="contact-label">LinkedIn</div>
-                        <div class="contact-value">
-                            <a href="https://www.linkedin.com/in/nelmar-dapulang-019978bb/"
-                                target="_blank">linkedin.com/in/nelmar-dapulang</a>
-                        </div>
-                    </div>
-
-                    <div class="contact-item">
-                        <div class="contact-label">GitHub</div>
-                        <div class="contact-value">
-                            <a href="https://github.com/Nhelmar24" target="_blank">github.com/Nhelmar24</a>
-                        </div>
-                    </div>
-
-                    <div class="contact-item">
-                        <div class="contact-label">Facebook</div>
-                        <div class="contact-value">
-                            <a href="https://www.facebook.com/nelmar.dapulang"
-                                target="_blank">facebook.com/nelmar.dapulang</a>
-                        </div>
-                    </div>
-
-                    <div class="contact-item">
-                        <div class="contact-label">Resume / CV</div>
-                        <div class="contact-value">
-                            <span>Available upon request or via email</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        © <span id="year"></span> Nelmar Dapulang — Portfolio. Built with HTML & CSS, hosted on GitHub Pages.
-    </footer>
-
-    <script>
-        document.getElementById('year').textContent = new Date().getFullYear();
-    </script>
+<script src="script.js"></script>
 </body>
-
 </html>
