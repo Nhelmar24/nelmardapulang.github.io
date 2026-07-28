@@ -9,6 +9,38 @@ document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
   }
 
+  // ---- Dark theme toggle ----
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const THEME_KEY = 'nd-theme';
+
+  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const savedTheme = (() => {
+    try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+  })();
+  const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+
+  const applyTheme = (theme) => {
+    if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      themeToggle.setAttribute('aria-pressed', 'true');
+      themeToggle.setAttribute('aria-label', 'Switch to light theme');
+    } else {
+      root.removeAttribute('data-theme');
+      themeToggle.setAttribute('aria-pressed', 'false');
+      themeToggle.setAttribute('aria-label', 'Switch to dark theme');
+    }
+  };
+
+  applyTheme(initialTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const isDark = root.getAttribute('data-theme') === 'dark';
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* storage unavailable, theme still applies for this session */ }
+  });
+
   // ---- Header scroll state ----
   const header = document.getElementById('site-header');
   const onScroll = () => {
