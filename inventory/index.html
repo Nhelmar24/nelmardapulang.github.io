@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N24SS — Inventory & Warehouse Management</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ==================== THEME VARIABLES ==================== */
+:root{
+  --bg:#f3f5f9;
+  --sidebar-bg:#161b2e;
+  --sidebar-text:#aab1c8;
+  --sidebar-text-active:#ffffff;
+  --sidebar-accent:#5b6ef5;
+  --card:#ffffff;
+  --card-border:#e5e8f0;
+  --text:#1c2136;
+  --text-muted:#6b7188;
+  --accent:#5b6ef5;
+  --accent-dark:#4457e0;
+  --success:#1aa26a;
+  --success-bg:#e6f7f0;
+  --warning:#c9820a;
+  --warning-bg:#fdf3e0;
+  --danger:#d1414a;
+  --danger-bg:#fbe8e9;
+  --info:#2b7bd1;
+  --info-bg:#e7f1fc;
+  --table-head:#f6f7fb;
+  --table-hover:#f6f8ff;
+  --input-bg:#ffffff;
+  --input-border:#d6dae5;
+  --shadow: 0 1px 3px rgba(20,24,45,0.08), 0 1px 2px rgba(20,24,45,0.04);
+  --modal-overlay: rgba(15,18,32,0.55);
+  --radius:10px;
+}
+[data-theme="dark"]{
+  --bg:#0f1320;
+  --sidebar-bg:#0a0d18;
+  --sidebar-text:#8890ab;
+  --sidebar-text-active:#ffffff;
+  --sidebar-accent:#6c7cf7;
+  --card:#171c2c;
+  --card-border:#272e45;
+  --text:#e7e9f3;
+  --text-muted:#8f96b0;
+  --accent:#6c7cf7;
+  --accent-dark:#5867e8;
+  --success:#33c98a;
+  --success-bg:#123324;
+  --warning:#e0a836;
+  --warning-bg:#3a2c10;
+  --danger:#f0666e;
+  --danger-bg:#3a1518;
+  --info:#5aa4f0;
+  --info-bg:#0f2740;
+  --table-head:#1d2336;
+  --table-hover:#1c2238;
+  --input-bg:#1c2236;
+  --input-border:#333c58;
+  --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  --modal-overlay: rgba(0,0,0,0.65);
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s;}
+a{color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+/* ==================== LOGIN ==================== */
+#loginPage{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#161b2e 0%,#232a48 100%);}
+.login-card{background:var(--card);width:380px;max-width:92vw;padding:36px 32px;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,0.35);}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.login-logo .mark{width:38px;height:38px;border-radius:9px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;}
+.login-logo .name{font-size:20px;font-weight:700;letter-spacing:-0.3px;}
+.login-card p.sub{color:var(--text-muted);margin:0 0 24px;font-size:13.5px;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;color:var(--text-muted);}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:14px;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;padding:10px 16px;font-size:13.5px;font-weight:600;cursor:pointer;transition:background .15s,opacity .15s;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-dark);}
+.btn-block{width:100%;}
+.btn-secondary{background:transparent;border:1px solid var(--input-border);color:var(--text);}
+.btn-secondary:hover{background:var(--table-hover);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-danger:hover{opacity:.9;}
+.btn-sm{padding:6px 10px;font-size:12.5px;}
+.error-msg{background:var(--danger-bg);color:var(--danger);padding:9px 12px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none;}
+.hint-box{background:var(--table-head);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text-muted);margin-top:18px;}
+
+/* ==================== APP LAYOUT ==================== */
+#app{display:none;min-height:100vh;}
+.app-shell{display:flex;min-height:100vh;}
+#sidebar{width:246px;flex-shrink:0;background:var(--sidebar-bg);color:var(--sidebar-text);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;overflow-y:auto;z-index:200;transition:transform .2s;}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:#2a3150;border-radius:3px;}
+.side-brand{display:flex;align-items:center;gap:10px;padding:20px 18px;font-weight:700;color:#fff;font-size:16px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.side-brand .mark{width:30px;height:30px;border-radius:8px;background:var(--sidebar-accent);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.side-group-title{font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:#5a6285;padding:16px 18px 6px;font-weight:700;}
+.side-nav{list-style:none;margin:0;padding:0 10px;}
+.side-nav li{margin-bottom:2px;}
+.side-nav li a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:7px;font-size:13.5px;color:var(--sidebar-text);text-decoration:none;cursor:pointer;}
+.side-nav li a:hover{background:rgba(255,255,255,0.05);color:#fff;}
+.side-nav li a.active{background:var(--sidebar-accent);color:#fff;}
+.side-nav li a .ic{width:16px;text-align:center;font-size:14px;}
+.side-bottom{margin-top:auto;padding:10px 10px 18px;border-top:1px solid rgba(255,255,255,0.06);}
+
+#mainWrap{margin-left:246px;flex:1;display:flex;flex-direction:column;min-width:0;}
+#topbar{height:60px;background:var(--card);border-bottom:1px solid var(--card-border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:14px;}
+#menuToggle{display:none;background:none;border:none;font-size:20px;color:var(--text);padding:4px 6px;}
+.page-title{font-size:17px;font-weight:700;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.icon-btn{background:none;border:1px solid var(--card-border);width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:15px;position:relative;}
+.icon-btn:hover{background:var(--table-hover);}
+.badge-dot{position:absolute;top:-4px;right:-4px;background:var(--danger);color:#fff;font-size:10px;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px;font-weight:700;}
+.user-chip{display:flex;align-items:center;gap:8px;padding:5px 10px 5px 5px;border-radius:20px;background:var(--table-head);}
+.user-chip .av{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+.user-chip span{font-size:13px;font-weight:600;}
+
+#pageContent{padding:22px 26px 60px;flex:1;}
+.page{display:none;}
+.page.active{display:block;}
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:18px;}
+.page-head h2{margin:0 0 4px;font-size:20px;}
+.page-head p{margin:0;color:var(--text-muted);font-size:13px;}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.toolbar input[type=text],.toolbar select,.toolbar input[type=date]{padding:8px 12px;border:1px solid var(--input-border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:13px;}
+.toolbar .grow{flex:1;min-width:160px;}
+
+/* Cards */
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:22px;}
+.stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
+.stat-card .top{display:flex;justify-content:space-between;align-items:center;}
+.stat-card .ic{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.stat-card .val{font-size:24px;font-weight:800;margin-top:10px;}
+.stat-card .lbl{color:var(--text-muted);font-size:12.5px;margin-top:2px;}
+
+.panel{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:20px;overflow:hidden;}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--card-border);display:flex;justify-content:space-between;align-items:center;}
+.panel-head h3{margin:0;font-size:14.5px;}
+.panel-body{padding:0 18px 16px;}
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;}
+.two-col > .panel{margin-bottom:0;}
+
+/* Tables */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--table-head);text-align:left;padding:10px 12px;font-weight:700;color:var(--text-muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;}
+tbody td{padding:10px 12px;border-top:1px solid var(--card-border);white-space:nowrap;}
+tbody tr:hover{background:var(--table-hover);}
+.empty-row td{text-align:center;color:var(--text-muted);padding:26px;}
+
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;}
+.badge-success{background:var(--success-bg);color:var(--success);}
+.badge-warning{background:var(--warning-bg);color:var(--warning);}
+.badge-danger{background:var(--danger-bg);color:var(--danger);}
+.badge-info{background:var(--info-bg);color:var(--info);}
+.badge-muted{background:var(--table-head);color:var(--text-muted);}
+
+.row-actions{display:flex;gap:6px;}
+.row-actions button{background:none;border:1px solid var(--card-border);border-radius:6px;width:28px;height:28px;color:var(--text-muted);font-size:12.5px;}
+.row-actions button:hover{color:var(--accent);border-color:var(--accent);}
+.row-actions button.del:hover{color:var(--danger);border-color:var(--danger);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:var(--modal-overlay);display:none;align-items:flex-start;justify-content:center;z-index:1000;padding:40px 16px;overflow-y:auto;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border-radius:12px;width:520px;max-width:100%;box-shadow:0 25px 60px rgba(0,0,0,0.35);}
+.modal-box.wide{width:760px;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--card-border);}
+.modal-head h3{margin:0;font-size:16px;}
+.modal-close{background:none;border:none;font-size:18px;color:var(--text-muted);}
+.modal-body{padding:18px 20px;max-height:70vh;overflow-y:auto;}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--card-border);display:flex;justify-content:flex-end;gap:10px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-grid .full{grid-column:1/-1;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+
+/* Toasts */
+#toastWrap{position:fixed;top:18px;right:18px;z-index:2000;display:flex;flex-direction:column;gap:10px;}
+.toast{min-width:260px;max-width:340px;background:var(--card);border:1px solid var(--card-border);border-left:4px solid var(--accent);border-radius:8px;padding:12px 14px;box-shadow:0 10px 25px rgba(0,0,0,0.2);font-size:13px;animation:slideIn .2s ease-out;}
+.toast.success{border-left-color:var(--success);}
+.toast.warning{border-left-color:var(--warning);}
+.toast.error{border-left-color:var(--danger);}
+.toast strong{display:block;margin-bottom:2px;font-size:13px;}
+@keyframes slideIn{from{transform:translateX(30px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+
+/* Notification dropdown */
+.dropdown{position:relative;}
+.dropdown-panel{position:absolute;top:44px;right:0;width:320px;background:var(--card);border:1px solid var(--card-border);border-radius:10px;box-shadow:0 15px 40px rgba(0,0,0,0.25);display:none;max-height:400px;overflow-y:auto;z-index:500;}
+.dropdown-panel.open{display:block;}
+.dropdown-panel .dh{padding:12px 14px;font-weight:700;font-size:13px;border-bottom:1px solid var(--card-border);}
+.notif-item{padding:10px 14px;border-bottom:1px solid var(--card-border);font-size:12.5px;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item .n-msg{margin-bottom:3px;}
+.notif-item .n-time{color:var(--text-muted);font-size:11px;}
+
+.low{color:var(--danger);font-weight:700;}
+.helper{color:var(--text-muted);font-size:12px;margin-top:4px;}
+.section-sub{font-size:13px;font-weight:700;margin:16px 0 8px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.03em;}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+@media(max-width:900px){.chart-grid{grid-template-columns:1fr;}.two-col{grid-template-columns:1fr;}}
+.po-items-table input{width:100%;padding:6px 8px;border:1px solid var(--input-border);border-radius:6px;background:var(--input-bg);color:var(--text);font-size:12.5px;}
+.diff-pos{color:var(--success);font-weight:700;}
+.diff-neg{color:var(--danger);font-weight:700;}
+.diff-zero{color:var(--text-muted);}
+
+/* Responsive */
+@media(max-width:960px){
+  #sidebar{transform:translateX(-100%);}
+  #sidebar.open{transform:translateX(0);}
+  #mainWrap{margin-left:0;}
+  #menuToggle{display:block;}
+  .two-col{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .page-title{font-size:15px;}
+  .user-chip span{display:none;}
+  #pageContent{padding:16px;}
+}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:150;}
+.sidebar-overlay.open{display:block;}
+</style>
+</head>
+<body>
+
+<!-- ==================== LOGIN PAGE ==================== -->
+<div id="loginPage">
+  <div class="login-card">
+    <div class="login-logo"><div class="mark">N24</div><div class="name">Software Solutions</div></div>
+    <p class="sub">Inventory & Warehouse Management — sign in to continue</p>
+    <div id="loginError" class="error-msg"></div>
+    <form id="loginForm" onsubmit="return handleLogin(event)">
+      <div class="field"><label>Username</label><input type="text" id="loginUser" autocomplete="username" required></div>
+      <div class="field"><label>Password</label><input type="password" id="loginPass" autocomplete="current-password" required></div>
+      <button type="submit" class="btn btn-primary btn-block">Log In</button>
+    </form>
+    <div class="hint-box">Demo credentials — Username: <strong>admin</strong> &nbsp; Password: <strong>admin123</strong></div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
+<div id="app">
+<div class="app-shell">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar(false)"></div>
+  <aside id="sidebar">
+    <div class="side-brand"><div class="mark">SB</div> StockBase</div>
+
+    <div class="side-group-title">Core</div>
+    <ul class="side-nav">
+      <li><a data-page="dashboard" class="active" onclick="showPage('dashboard')"><span class="ic">&#9632;</span> Dashboard</a></li>
+      <li><a data-page="products" onclick="showPage('products')"><span class="ic">&#128230;</span> Products</a></li>
+      <li><a data-page="categories" onclick="showPage('categories')"><span class="ic">&#128193;</span> Categories</a></li>
+      <li><a data-page="brands" onclick="showPage('brands')"><span class="ic">&#127991;</span> Brands</a></li>
+      <li><a data-page="units" onclick="showPage('units')"><span class="ic">&#128207;</span> Units</a></li>
+      <li><a data-page="suppliers" onclick="showPage('suppliers')"><span class="ic">&#128100;</span> Suppliers</a></li>
+      <li><a data-page="warehouses" onclick="showPage('warehouses')"><span class="ic">&#127970;</span> Warehouses</a></li>
+    </ul>
+
+    <div class="side-group-title">Inventory</div>
+    <ul class="side-nav">
+      <li><a data-page="stockin" onclick="showPage('stockin')"><span class="ic">&#8595;</span> Stock In</a></li>
+      <li><a data-page="stockout" onclick="showPage('stockout')"><span class="ic">&#8593;</span> Stock Out</a></li>
+      <li><a data-page="movements" onclick="showPage('movements')"><span class="ic">&#8646;</span> Stock Movements</a></li>
+      <li><a data-page="barcode" onclick="showPage('barcode')"><span class="ic">&#9611;</span> Barcode Support</a></li>
+      <li><a data-page="lowstock" onclick="showPage('lowstock')"><span class="ic">&#9888;</span> Low Stock Alerts</a></li>
+    </ul>
+
+    <div class="side-group-title">Purchasing</div>
+    <ul class="side-nav">
+      <li><a data-page="po" onclick="showPage('po')"><span class="ic">&#128203;</span> Purchase Orders</a></li>
+      <li><a data-page="receiving" onclick="showPage('receiving')"><span class="ic">&#128230;</span> Goods Receiving</a></li>
+      <li><a data-page="supplierhistory" onclick="showPage('supplierhistory')"><span class="ic">&#128337;</span> Supplier Purchase History</a></li>
+    </ul>
+
+    <div class="side-group-title">Warehouse</div>
+    <ul class="side-nav">
+      <li><a data-page="transfers" onclick="showPage('transfers')"><span class="ic">&#8644;</span> Stock Transfers</a></li>
+      <li><a data-page="counting" onclick="showPage('counting')"><span class="ic">&#128203;</span> Inventory Counting</a></li>
+      <li><a data-page="adjustments" onclick="showPage('adjustments')"><span class="ic">&#9998;</span> Stock Adjustments</a></li>
+    </ul>
+
+    <div class="side-group-title">Reporting</div>
+    <ul class="side-nav">
+      <li><a data-page="reports" onclick="showPage('reports')"><span class="ic">&#128202;</span> Reports</a></li>
+      <li><a data-page="analytics" onclick="showPage('analytics')"><span class="ic">&#128200;</span> Analytics</a></li>
+      <li><a data-page="audit" onclick="showPage('audit')"><span class="ic">&#128220;</span> Audit Logs</a></li>
+      <li><a data-page="notifications" onclick="showPage('notifications')"><span class="ic">&#128276;</span> Notifications</a></li>
+    </ul>
+
+    <div class="side-bottom">
+      <ul class="side-nav">
+        <li><a data-page="settings" onclick="showPage('settings')"><span class="ic">&#9881;</span> Settings</a></li>
+        <li><a onclick="handleLogout()"><span class="ic">&#9099;</span> Logout</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <div id="mainWrap">
+    <div id="topbar">
+      <div class="topbar-left">
+        <button id="menuToggle" onclick="toggleSidebar()">&#9776;</button>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">&#9728;</button>
+        <div class="dropdown">
+          <button class="icon-btn" onclick="toggleNotifDropdown()" title="Notifications">&#128276;<span class="badge-dot" id="notifBadge" style="display:none;">0</span></button>
+          <div class="dropdown-panel" id="notifDropdown">
+            <div class="dh">Notifications</div>
+            <div id="notifList"></div>
+          </div>
+        </div>
+        <div class="user-chip"><div class="av">A</div><span>admin</span></div>
+      </div>
+    </div>
+
+    <div id="pageContent">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-head"><div><h2>Dashboard</h2><p>Overview of your inventory and warehouse operations</p></div></div>
+        <div class="grid-cards" id="dashCards"></div>
+        <div class="two-col">
+          <div class="panel">
+            <div class="panel-head"><h3>Recent Stock Movements</h3></div>
+            <div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>Product</th><th>Type</th><th>Qty</th><th>Warehouse</th><th>User</th></tr></thead><tbody id="dashMovementsBody"></tbody></table></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h3>Low Stock Products</h3></div>
+            <div class="panel-body table-wrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Stock</th><th>Min</th><th>Status</th></tr></thead><tbody id="dashLowStockBody"></tbody></table></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Recent Activity</h3></div>
+          <div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>User</th><th>Action</th><th>Module</th><th>Description</th></tr></thead><tbody id="dashActivityBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="page" id="page-products">
+        <div class="page-head"><div><h2>Products</h2><p>Manage your product catalog</p></div><button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button></div>
+        <div class="toolbar">
+          <input type="text" class="grow" id="productSearch" placeholder="Search by name, SKU, or barcode..." oninput="renderProducts()">
+          <select id="productCategoryFilter" onchange="renderProducts()"><option value="">All Categories</option></select>
+          <select id="productWarehouseFilter" onchange="renderProducts()"><option value="">All Warehouses</option></select>
+          <select id="productStatusFilter" onchange="renderProducts()"><option value="">All Status</option><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+        </div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>SKU</th><th>Barcode</th><th>Name</th><th>Category</th><th>Brand</th><th>Supplier</th><th>Warehouse</th><th>Cost</th><th>Price</th><th>Stock</th><th>Min</th><th>Status</th><th>Actions</th></tr></thead><tbody id="productsBody"></tbody></table></div></div>
+      </div>
+
+      <!-- CATEGORIES / BRANDS / UNITS / SUPPLIERS / WAREHOUSES generated via generic entity pages -->
+      <div class="page" id="page-categories">
+        <div class="page-head"><div><h2>Categories</h2><p>Organize products by category</p></div><button class="btn btn-primary" onclick="openEntityModal('categories')">+ Add Category</button></div>
+        <div class="toolbar"><input type="text" class="grow" id="categoriesSearch" placeholder="Search categories..." oninput="renderEntityTable('categories')"></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead><tbody id="categoriesBody"></tbody></table></div></div>
+      </div>
+
+      <div class="page" id="page-brands">
+        <div class="page-head"><div><h2>Brands</h2><p>Manage product brands</p></div><button class="btn btn-primary" onclick="openEntityModal('brands')">+ Add Brand</button></div>
+        <div class="toolbar"><input type="text" class="grow" id="brandsSearch" placeholder="Search brands..." oninput="renderEntityTable('brands')"></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead><tbody id="brandsBody"></tbody></table></div></div>
+      </div>
+
+      <div class="page" id="page-units">
+        <div class="page-head"><div><h2>Units</h2><p>Units of measure for products</p></div><button class="btn btn-primary" onclick="openEntityModal('units')">+ Add Unit</button></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>ID</th><th>Unit Name</th><th>Abbreviation</th><th>Status</th><th>Actions</th></tr></thead><tbody id="unitsBody"></tbody></table></div></div>
+      </div>
+
+      <div class="page" id="page-suppliers">
+        <div class="page-head"><div><h2>Suppliers</h2><p>Manage supplier information</p></div><button class="btn btn-primary" onclick="openEntityModal('suppliers')">+ Add Supplier</button></div>
+        <div class="toolbar"><input type="text" class="grow" id="suppliersSearch" placeholder="Search suppliers..." oninput="renderEntityTable('suppliers')"></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Contact Person</th><th>Phone</th><th>Email</th><th>Address</th><th>Status</th><th>Actions</th></tr></thead><tbody id="suppliersBody"></tbody></table></div></div>
+      </div>
+
+      <div class="page" id="page-warehouses">
+        <div class="page-head"><div><h2>Warehouses</h2><p>Manage warehouse locations</p></div><button class="btn btn-primary" onclick="openEntityModal('warehouses')">+ Add Warehouse</button></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>ID</th><th>Name</th><th>Location</th><th>Manager</th><th>Status</th><th>Actions</th></tr></thead><tbody id="warehousesBody"></tbody></table></div></div>
+      </div>
+
+      <!-- STOCK IN -->
+      <div class="page" id="page-stockin">
+        <div class="page-head"><div><h2>Stock In</h2><p>Record incoming stock</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <form onsubmit="return submitStockIn(event)">
+            <div class="form-grid">
+              <div class="field"><label>Date</label><input type="date" id="siDate" required></div>
+              <div class="field"><label>Reference Number</label><input type="text" id="siRef" placeholder="Auto-generated if blank"></div>
+              <div class="field"><label>Product</label><select id="siProduct" required></select></div>
+              <div class="field"><label>Warehouse</label><select id="siWarehouse" required></select></div>
+              <div class="field"><label>Quantity</label><input type="number" id="siQty" min="1" required></div>
+              <div class="field full"><label>Remarks</label><input type="text" id="siRemarks"></div>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit Stock In</button>
+          </form>
+        </div></div>
+      </div>
+
+      <!-- STOCK OUT -->
+      <div class="page" id="page-stockout">
+        <div class="page-head"><div><h2>Stock Out</h2><p>Record outgoing stock</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <form onsubmit="return submitStockOut(event)">
+            <div class="form-grid">
+              <div class="field"><label>Date</label><input type="date" id="soDate" required></div>
+              <div class="field"><label>Reference Number</label><input type="text" id="soRef" placeholder="Auto-generated if blank"></div>
+              <div class="field"><label>Product</label><select id="soProduct" required></select></div>
+              <div class="field"><label>Warehouse</label><select id="soWarehouse" required></select></div>
+              <div class="field"><label>Quantity</label><input type="number" id="soQty" min="1" required></div>
+              <div class="field full"><label>Remarks</label><input type="text" id="soRemarks"></div>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit Stock Out</button>
+          </form>
+        </div></div>
+      </div>
+
+      <!-- MOVEMENTS -->
+      <div class="page" id="page-movements">
+        <div class="page-head"><div><h2>Stock Movements</h2><p>Full transaction history</p></div></div>
+        <div class="toolbar">
+          <input type="text" class="grow" id="movSearch" placeholder="Search product or reference..." oninput="renderMovements()">
+          <select id="movTypeFilter" onchange="renderMovements()"><option value="">All Types</option><option>Stock In</option><option>Stock Out</option><option>Transfer In</option><option>Transfer Out</option><option>Adjustment</option><option>Goods Received</option></select>
+          <select id="movWarehouseFilter" onchange="renderMovements()"><option value="">All Warehouses</option></select>
+        </div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>Reference</th><th>Product</th><th>Type</th><th>Qty</th><th>Warehouse</th><th>User</th><th>Remarks</th></tr></thead><tbody id="movementsBody"></tbody></table></div></div>
+      </div>
+
+      <!-- BARCODE -->
+      <div class="page" id="page-barcode">
+        <div class="page-head"><div><h2>Barcode Support</h2><p>Scan or type a barcode to find a product</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <div class="toolbar">
+            <input type="text" class="grow" id="barcodeInput" placeholder="Scan or type barcode, then press Enter..." onkeydown="if(event.key==='Enter'){event.preventDefault();lookupBarcode();}">
+            <button class="btn btn-primary" onclick="lookupBarcode()">Scan / Search</button>
+          </div>
+          <div id="barcodeResult"></div>
+        </div></div>
+      </div>
+
+      <!-- LOW STOCK -->
+      <div class="page" id="page-lowstock">
+        <div class="page-head"><div><h2>Low Stock Alerts</h2><p>Products at or below minimum stock level</p></div></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Current Stock</th><th>Minimum Stock</th><th>Warehouse</th><th>Status</th></tr></thead><tbody id="lowStockBody"></tbody></table></div></div>
+      </div>
+
+      <!-- PURCHASE ORDERS -->
+      <div class="page" id="page-po">
+        <div class="page-head"><div><h2>Purchase Orders</h2><p>Create and track purchase orders</p></div><button class="btn btn-primary" onclick="openPOModal()">+ Create PO</button></div>
+        <div class="toolbar">
+          <input type="text" class="grow" id="poSearch" placeholder="Search PO number or supplier..." oninput="renderPOs()">
+          <select id="poStatusFilter" onchange="renderPOs()"><option value="">All Status</option><option>Draft</option><option>Pending</option><option>Approved</option><option>Received</option><option>Cancelled</option></select>
+        </div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>PO Number</th><th>Supplier</th><th>Date</th><th>Expected</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="poBody"></tbody></table></div></div>
+      </div>
+
+      <!-- GOODS RECEIVING -->
+      <div class="page" id="page-receiving">
+        <div class="page-head"><div><h2>Goods Receiving</h2><p>Receive items against purchase orders</p></div><button class="btn btn-primary" onclick="openReceivingModal()">+ Receive Goods</button></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>Receiving #</th><th>PO Number</th><th>Supplier</th><th>Warehouse</th><th>Date</th><th>Remarks</th></tr></thead><tbody id="receivingBody"></tbody></table></div></div>
+      </div>
+
+      <!-- SUPPLIER HISTORY -->
+      <div class="page" id="page-supplierhistory">
+        <div class="page-head"><div><h2>Supplier Purchase History</h2><p>Purchase history grouped by supplier</p></div></div>
+        <div class="toolbar"><select id="supHistFilter" onchange="renderSupplierHistory()"><option value="">All Suppliers</option></select></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>Supplier</th><th>PO Number</th><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th>Status</th></tr></thead><tbody id="supplierHistBody"></tbody></table></div></div>
+      </div>
+
+      <!-- TRANSFERS -->
+      <div class="page" id="page-transfers">
+        <div class="page-head"><div><h2>Stock Transfers</h2><p>Move stock between warehouses</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <form onsubmit="return submitTransfer(event)">
+            <div class="form-grid">
+              <div class="field"><label>Date</label><input type="date" id="trDate" required></div>
+              <div class="field"><label>Transfer Number</label><input type="text" id="trNumber" placeholder="Auto-generated if blank"></div>
+              <div class="field"><label>Product</label><select id="trProduct" required></select></div>
+              <div class="field"><label>Quantity</label><input type="number" id="trQty" min="1" required></div>
+              <div class="field"><label>From Warehouse</label><select id="trFrom" required></select></div>
+              <div class="field"><label>To Warehouse</label><select id="trTo" required></select></div>
+              <div class="field full"><label>Remarks</label><input type="text" id="trRemarks"></div>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit Transfer</button>
+          </form>
+        </div></div>
+        <div class="panel"><div class="panel-head"><h3>Transfer History</h3></div><div class="panel-body table-wrap"><table><thead><tr><th>Transfer #</th><th>Date</th><th>Product</th><th>From</th><th>To</th><th>Qty</th><th>Remarks</th></tr></thead><tbody id="transfersBody"></tbody></table></div></div>
+      </div>
+
+      <!-- INVENTORY COUNTING -->
+      <div class="page" id="page-counting">
+        <div class="page-head"><div><h2>Inventory Counting</h2><p>Compare physical counts against system quantity</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <form onsubmit="return submitCount(event)">
+            <div class="form-grid">
+              <div class="field"><label>Counting Number</label><input type="text" id="cnNumber" placeholder="Auto-generated if blank"></div>
+              <div class="field"><label>Warehouse</label><select id="cnWarehouse" required></select></div>
+              <div class="field"><label>Product</label><select id="cnProduct" required onchange="updateCountSystemQty()"></select></div>
+              <div class="field"><label>System Quantity</label><input type="number" id="cnSystemQty" readonly></div>
+              <div class="field"><label>Physical Quantity</label><input type="number" id="cnPhysicalQty" min="0" required></div>
+              <div class="field full"><label>Remarks</label><input type="text" id="cnRemarks"></div>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit Count</button>
+          </form>
+        </div></div>
+        <div class="panel"><div class="panel-head"><h3>Count History</h3></div><div class="panel-body table-wrap"><table><thead><tr><th>Count #</th><th>Warehouse</th><th>Product</th><th>System Qty</th><th>Physical Qty</th><th>Difference</th><th>Result</th><th>Actions</th></tr></thead><tbody id="countingBody"></tbody></table></div></div>
+      </div>
+
+      <!-- STOCK ADJUSTMENTS -->
+      <div class="page" id="page-adjustments">
+        <div class="page-head"><div><h2>Stock Adjustments</h2><p>Manually correct stock levels</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <form onsubmit="return submitAdjustment(event)">
+            <div class="form-grid">
+              <div class="field"><label>Date</label><input type="date" id="adjDate" required></div>
+              <div class="field"><label>Adjustment Number</label><input type="text" id="adjNumber" placeholder="Auto-generated if blank"></div>
+              <div class="field"><label>Warehouse</label><select id="adjWarehouse" required></select></div>
+              <div class="field"><label>Product</label><select id="adjProduct" required onchange="updateAdjCurrentStock()"></select></div>
+              <div class="field"><label>Current Stock</label><input type="number" id="adjCurrentStock" readonly></div>
+              <div class="field"><label>Adjustment Type</label><select id="adjType"><option value="Increase">Increase</option><option value="Decrease">Decrease</option></select></div>
+              <div class="field"><label>Adjustment Quantity</label><input type="number" id="adjQty" min="1" required></div>
+              <div class="field full"><label>Reason</label><input type="text" id="adjReason" required></div>
+            </div>
+            <button class="btn btn-primary" type="submit">Submit Adjustment</button>
+          </form>
+        </div></div>
+        <div class="panel"><div class="panel-head"><h3>Adjustment History</h3></div><div class="panel-body table-wrap"><table><thead><tr><th>Adj #</th><th>Date</th><th>Warehouse</th><th>Product</th><th>Type</th><th>Qty</th><th>Reason</th></tr></thead><tbody id="adjustmentsBody"></tbody></table></div></div>
+      </div>
+
+      <!-- REPORTS -->
+      <div class="page" id="page-reports">
+        <div class="page-head"><div><h2>Reports</h2><p>Inventory, movement, and purchase reports</p></div></div>
+        <div class="toolbar">
+          <select id="reportProductFilter" onchange="renderReports()"><option value="">All Products</option></select>
+          <select id="reportWarehouseFilter" onchange="renderReports()"><option value="">All Warehouses</option></select>
+          <select id="reportSupplierFilter" onchange="renderReports()"><option value="">All Suppliers</option></select>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>Inventory Report</h3><button class="btn btn-secondary btn-sm" onclick="exportCSV('inventory')">Export CSV</button></div>
+          <div class="panel-body table-wrap"><table><thead><tr><th>Product</th><th>SKU</th><th>Warehouse</th><th>Current Stock</th><th>Minimum Stock</th><th>Status</th></tr></thead><tbody id="reportInventoryBody"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Stock Movement Report</h3><button class="btn btn-secondary btn-sm" onclick="exportCSV('movement')">Export CSV</button></div>
+          <div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>Product</th><th>Movement Type</th><th>Quantity</th><th>Warehouse</th></tr></thead><tbody id="reportMovementBody"></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Purchase Report</h3><button class="btn btn-secondary btn-sm" onclick="exportCSV('purchase')">Export CSV</button></div>
+          <div class="panel-body table-wrap"><table><thead><tr><th>PO</th><th>Supplier</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody id="reportPurchaseBody"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="page" id="page-analytics">
+        <div class="page-head"><div><h2>Analytics</h2><p>Key statistics from current data</p></div></div>
+        <div class="grid-cards" id="analyticsCards"></div>
+        <div class="chart-grid">
+          <div class="panel"><div class="panel-head"><h3>Stock In vs Stock Out</h3></div><div class="panel-body"><canvas id="chartInOut" height="220"></canvas></div></div>
+          <div class="panel"><div class="panel-head"><h3>Inventory by Warehouse</h3></div><div class="panel-body"><canvas id="chartByWarehouse" height="220"></canvas></div></div>
+          <div class="panel"><div class="panel-head"><h3>Products by Category</h3></div><div class="panel-body"><canvas id="chartByCategory" height="220"></canvas></div></div>
+          <div class="panel"><div class="panel-head"><h3>Purchase Orders by Status</h3></div><div class="panel-body"><canvas id="chartPOStatus" height="220"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- AUDIT LOGS -->
+      <div class="page" id="page-audit">
+        <div class="page-head"><div><h2>Audit Logs</h2><p>System-wide action history</p></div></div>
+        <div class="toolbar"><input type="text" class="grow" id="auditSearch" placeholder="Search action, module, or description..." oninput="renderAuditLogs()"></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>User</th><th>Action</th><th>Module</th><th>Description</th></tr></thead><tbody id="auditBody"></tbody></table></div></div>
+      </div>
+
+      <!-- NOTIFICATIONS PAGE -->
+      <div class="page" id="page-notifications">
+        <div class="page-head"><div><h2>Notifications</h2><p>All system notifications</p></div><button class="btn btn-secondary btn-sm" onclick="markAllNotifsRead()">Mark all read</button></div>
+        <div class="panel"><div class="panel-body table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Message</th><th>Status</th></tr></thead><tbody id="notifPageBody"></tbody></table></div></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-head"><div><h2>Settings</h2><p>Application preferences</p></div></div>
+        <div class="panel"><div class="panel-body">
+          <div class="field"><label>Theme</label>
+            <select id="settingsTheme" onchange="setTheme(this.value)"><option value="light">Light</option><option value="dark">Dark</option></select>
+          </div>
+          <div class="helper">This is a frontend-only MVP demo. All data is temporary and stored in memory for this session only — it will be cleared on logout or page reload.</div>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay"><div class="modal-box" id="modalBox"></div></div>
+<div id="toastWrap"></div>
+
+<script>
+/* =====================================================================
+   APPLICATION STATE
+===================================================================== */
+let state = null;
+function freshState(){
+  return {
+    products: [], categories: [], brands: [], units: [], suppliers: [], warehouses: [],
+    stockMovements: [], purchaseOrders: [], goodsReceipts: [], transfers: [],
+    inventoryCounts: [], adjustments: [], auditLogs: [], notifications: [],
+    ids: {product:1,category:1,brand:1,unit:1,supplier:1,warehouse:1,movement:1,po:1,receipt:1,transfer:1,count:1,adjustment:1,notification:1}
+  };
+}
+function nextId(key){ return state.ids[key]++; }
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function nowStr(){ const d=new Date(); return d.toISOString().slice(0,10)+' '+d.toTimeString().slice(0,5); }
+
+/* =====================================================================
+   AUTHENTICATION
+===================================================================== */
+function handleLogin(e){
+  e.preventDefault();
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  const errBox = document.getElementById('loginError');
+  if(u === 'admin' && p === 'admin123'){
+    errBox.style.display='none';
+    state = freshState();
+    seedDemoData();
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('app').style.display='block';
+    applyTheme('light');
+    addAuditLog('Login','Auth','User admin logged in');
+    showPage('dashboard');
+  } else {
+    errBox.textContent = 'Invalid username or password.';
+    errBox.style.display='block';
+  }
+  return false;
+}
+function handleLogout(){
+  if(state){ addAuditLog('Logout','Auth','User admin logged out'); }
+  state = null;
+  document.getElementById('app').style.display='none';
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginForm').reset();
+  document.getElementById('loginError').style.display='none';
+}
+
+/* =====================================================================
+   NAVIGATION
+===================================================================== */
+const pageTitles = {
+  dashboard:'Dashboard', products:'Products', categories:'Categories', brands:'Brands', units:'Units',
+  suppliers:'Suppliers', warehouses:'Warehouses', stockin:'Stock In', stockout:'Stock Out',
+  movements:'Stock Movements', barcode:'Barcode Support', lowstock:'Low Stock Alerts',
+  po:'Purchase Orders', receiving:'Goods Receiving', supplierhistory:'Supplier Purchase History',
+  transfers:'Stock Transfers', counting:'Inventory Counting', adjustments:'Stock Adjustments',
+  reports:'Reports', analytics:'Analytics', audit:'Audit Logs', notifications:'Notifications', settings:'Settings'
+};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.side-nav a').forEach(a=>a.classList.remove('active'));
+  const link = document.querySelector('.side-nav a[data-page="'+id+'"]');
+  if(link) link.classList.add('active');
+  document.getElementById('pageTitle').textContent = pageTitles[id] || 'StockBase';
+  toggleSidebar(false);
+  renderPage(id);
+}
+function renderPage(id){
+  populateAllSelects();
+  switch(id){
+    case 'dashboard': renderDashboard(); break;
+    case 'products': renderProducts(); break;
+    case 'categories': renderEntityTable('categories'); break;
+    case 'brands': renderEntityTable('brands'); break;
+    case 'units': renderEntityTable('units'); break;
+    case 'suppliers': renderEntityTable('suppliers'); break;
+    case 'warehouses': renderEntityTable('warehouses'); break;
+    case 'stockin': document.getElementById('siDate').value = todayStr(); break;
+    case 'stockout': document.getElementById('soDate').value = todayStr(); break;
+    case 'movements': renderMovements(); break;
+    case 'lowstock': renderLowStock(); break;
+    case 'po': renderPOs(); break;
+    case 'receiving': renderReceiving(); break;
+    case 'supplierhistory': renderSupplierHistory(); break;
+    case 'transfers': document.getElementById('trDate').value = todayStr(); renderTransfers(); break;
+    case 'counting': updateCountSystemQty(); renderCounting(); break;
+    case 'adjustments': document.getElementById('adjDate').value = todayStr(); updateAdjCurrentStock(); renderAdjustments(); break;
+    case 'reports': renderReports(); break;
+    case 'analytics': renderAnalytics(); break;
+    case 'audit': renderAuditLogs(); break;
+    case 'notifications': renderNotifPage(); break;
+    case 'settings': document.getElementById('settingsTheme').value = document.documentElement.getAttribute('data-theme')||'light'; break;
+  }
+}
+function toggleSidebar(force){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  const open = force!==undefined ? force : !sb.classList.contains('open');
+  sb.classList.toggle('open', open);
+  ov.classList.toggle('open', open);
+}
+
+/* =====================================================================
+   THEME
+===================================================================== */
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  setTheme(cur === 'dark' ? 'light' : 'dark');
+}
+function setTheme(t){ applyTheme(t); }
+function applyTheme(t){
+  if(t==='dark'){ document.documentElement.setAttribute('data-theme','dark'); document.getElementById('themeBtn').innerHTML='&#127769;'; }
+  else{ document.documentElement.removeAttribute('data-theme'); document.getElementById('themeBtn').innerHTML='&#9728;'; }
+  const sel = document.getElementById('settingsTheme'); if(sel) sel.value = t;
+}
+
+/* =====================================================================
+   TOASTS & NOTIFICATIONS & AUDIT LOG
+===================================================================== */
+function showToast(msg, type, title){
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'');
+  t.innerHTML = (title?'<strong>'+title+'</strong>':'') + msg;
+  wrap.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3500);
+}
+function addNotification(message, type){
+  state.notifications.unshift({id:nextId('notification'), date:nowStr(), message, type: type||'info', read:false});
+  renderNotifBell();
+}
+function renderNotifBell(){
+  if(!state) return;
+  const unread = state.notifications.filter(n=>!n.read).length;
+  const badge = document.getElementById('notifBadge');
+  if(unread>0){ badge.style.display='flex'; badge.textContent = unread>99?'99+':unread; } else { badge.style.display='none'; }
+  const list = document.getElementById('notifList');
+  if(state.notifications.length===0){ list.innerHTML = '<div class="notif-item">No notifications yet.</div>'; return; }
+  list.innerHTML = state.notifications.slice(0,10).map(n=>
+    '<div class="notif-item"><div class="n-msg">'+escapeHtml(n.message)+'</div><div class="n-time">'+n.date+'</div></div>'
+  ).join('');
+}
+function toggleNotifDropdown(){
+  const dd = document.getElementById('notifDropdown');
+  dd.classList.toggle('open');
+  if(dd.classList.contains('open')){ state.notifications.forEach(n=>n.read=true); renderNotifBell(); }
+}
+document.addEventListener('click', function(e){
+  const dd = document.getElementById('notifDropdown');
+  if(!dd) return;
+  if(!e.target.closest('.dropdown') && dd.classList.contains('open')) dd.classList.remove('open');
+});
+function markAllNotifsRead(){ state.notifications.forEach(n=>n.read=true); renderNotifBell(); renderNotifPage(); }
+function renderNotifPage(){
+  const body = document.getElementById('notifPageBody');
+  if(state.notifications.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="4">No notifications.</td></tr>'; return; }
+  body.innerHTML = state.notifications.map(n=>
+    '<tr><td>'+n.date+'</td><td>'+badgeForType(n.type)+'</td><td>'+escapeHtml(n.message)+'</td><td>'+(n.read?'<span class="badge badge-muted">Read</span>':'<span class="badge badge-info">Unread</span>')+'</td></tr>'
+  ).join('');
+}
+function badgeForType(type){
+  const map = {success:'badge-success', warning:'badge-warning', error:'badge-danger', info:'badge-info'};
+  return '<span class="badge '+(map[type]||'badge-info')+'">'+type+'</span>';
+}
+function addAuditLog(action, module, description){
+  state.auditLogs.unshift({id:state.auditLogs.length+1, date:nowStr(), user:'admin', action, module, description});
+}
+
+/* =====================================================================
+   UI HELPERS
+===================================================================== */
+function escapeHtml(s){ if(s===undefined||s===null) return ''; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function statusBadge(status){
+  return status==='Active' ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-muted">Inactive</span>';
+}
+function poStatusBadge(status){
+  const map = {Draft:'badge-muted', Pending:'badge-warning', Approved:'badge-info', Received:'badge-success', Cancelled:'badge-danger'};
+  return '<span class="badge '+(map[status]||'badge-muted')+'">'+status+'</span>';
+}
+function findById(arr, id){ return arr.find(x=>x.id===Number(id)); }
+function categoryName(id){ const c=findById(state.categories,id); return c?c.name:'—'; }
+function brandName(id){ const b=findById(state.brands,id); return b?b.name:'—'; }
+function unitAbbr(id){ const u=findById(state.units,id); return u?u.abbr:'—'; }
+function supplierName(id){ const s=findById(state.suppliers,id); return s?s.name:'—'; }
+function warehouseName(id){ const w=findById(state.warehouses,id); return w?w.name:'—'; }
+function productName(id){ const p=findById(state.products,id); return p?p.name:'—'; }
+
+/* Generic modal control */
+function openModal(html, wide){
+  document.getElementById('modalBox').className = 'modal-box' + (wide?' wide':'');
+  document.getElementById('modalBox').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); document.getElementById('modalBox').innerHTML=''; }
+document.getElementById('modalOverlay').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
+
+/* =====================================================================
+   SELECT POPULATION
+===================================================================== */
+function opts(arr, valueKey, labelFn, includeBlank){
+  let html = includeBlank ? '<option value="">Select...</option>' : '';
+  html += arr.map(x=>'<option value="'+x[valueKey]+'">'+escapeHtml(labelFn(x))+'</option>').join('');
+  return html;
+}
+function populateAllSelects(){
+  const catOpts = opts(state.categories,'id',c=>c.name,true);
+  const brandOpts = opts(state.brands,'id',b=>b.name,true);
+  const unitOpts = opts(state.units,'id',u=>u.name+' ('+u.abbr+')',true);
+  const supOpts = opts(state.suppliers,'id',s=>s.name,true);
+  const whOpts = opts(state.warehouses,'id',w=>w.name,true);
+  const prodOpts = opts(state.products,'id',p=>p.name+' — '+p.sku,true);
+
+  setIfExists('productCategoryFilter', catOpts, true, 'All Categories');
+  setIfExists('productWarehouseFilter', whOpts, true, 'All Warehouses');
+  setIfExists('siProduct', prodOpts);
+  setIfExists('siWarehouse', whOpts);
+  setIfExists('soProduct', prodOpts);
+  setIfExists('soWarehouse', whOpts);
+  setIfExists('movWarehouseFilter', whOpts, true, 'All Warehouses');
+  setIfExists('trProduct', prodOpts);
+  setIfExists('trFrom', whOpts);
+  setIfExists('trTo', whOpts);
+  setIfExists('cnWarehouse', whOpts);
+  setIfExists('cnProduct', prodOpts);
+  setIfExists('adjWarehouse', whOpts);
+  setIfExists('adjProduct', prodOpts);
+  setIfExists('reportProductFilter', prodOpts, true, 'All Products');
+  setIfExists('reportWarehouseFilter', whOpts, true, 'All Warehouses');
+  setIfExists('reportSupplierFilter', supOpts, true, 'All Suppliers');
+  setIfExists('supHistFilter', supOpts, true, 'All Suppliers');
+}
+function setIfExists(id, html, includeBlankLabel, blankText){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const prevVal = el.value;
+  el.innerHTML = (includeBlankLabel ? '<option value="">'+blankText+'</option>' : '') + html.replace(/^<option value=""[^>]*>Select\.\.\.<\/option>/,'');
+  if([...el.options].some(o=>o.value===prevVal)) el.value = prevVal;
+}
+
+/* =====================================================================
+   ENTITY CONFIGS (Categories / Brands / Units / Suppliers / Warehouses)
+===================================================================== */
+const entityConfigs = {
+  categories: { stateKey:'categories', idKey:'category', label:'Category', nameField:'name',
+    fields:[
+      {key:'name', label:'Category Name', type:'text', required:true},
+      {key:'description', label:'Description', type:'text'},
+      {key:'status', label:'Status', type:'select', options:['Active','Inactive'], default:'Active'}
+    ],
+    columns:[{h:'ID',f:r=>r.id},{h:'Name',f:r=>escapeHtml(r.name)},{h:'Description',f:r=>escapeHtml(r.description||'—')},{h:'Status',f:r=>statusBadge(r.status)}]
+  },
+  brands: { stateKey:'brands', idKey:'brand', label:'Brand', nameField:'name',
+    fields:[
+      {key:'name', label:'Brand Name', type:'text', required:true},
+      {key:'description', label:'Description', type:'text'},
+      {key:'status', label:'Status', type:'select', options:['Active','Inactive'], default:'Active'}
+    ],
+    columns:[{h:'ID',f:r=>r.id},{h:'Name',f:r=>escapeHtml(r.name)},{h:'Description',f:r=>escapeHtml(r.description||'—')},{h:'Status',f:r=>statusBadge(r.status)}]
+  },
+  units: { stateKey:'units', idKey:'unit', label:'Unit', nameField:'name',
+    fields:[
+      {key:'name', label:'Unit Name', type:'text', required:true},
+      {key:'abbr', label:'Abbreviation', type:'text', required:true},
+      {key:'status', label:'Status', type:'select', options:['Active','Inactive'], default:'Active'}
+    ],
+    columns:[{h:'ID',f:r=>r.id},{h:'Name',f:r=>escapeHtml(r.name)},{h:'Abbr',f:r=>escapeHtml(r.abbr)},{h:'Status',f:r=>statusBadge(r.status)}]
+  },
+  suppliers: { stateKey:'suppliers', idKey:'supplier', label:'Supplier', nameField:'name',
+    fields:[
+      {key:'name', label:'Supplier Name', type:'text', required:true},
+      {key:'contactPerson', label:'Contact Person', type:'text'},
+      {key:'phone', label:'Phone', type:'text'},
+      {key:'email', label:'Email', type:'email'},
+      {key:'address', label:'Address', type:'text', full:true},
+      {key:'status', label:'Status', type:'select', options:['Active','Inactive'], default:'Active'}
+    ],
+    columns:[{h:'ID',f:r=>r.id},{h:'Name',f:r=>escapeHtml(r.name)},{h:'Contact',f:r=>escapeHtml(r.contactPerson||'—')},{h:'Phone',f:r=>escapeHtml(r.phone||'—')},{h:'Email',f:r=>escapeHtml(r.email||'—')},{h:'Address',f:r=>escapeHtml(r.address||'—')},{h:'Status',f:r=>statusBadge(r.status)}]
+  },
+  warehouses: { stateKey:'warehouses', idKey:'warehouse', label:'Warehouse', nameField:'name',
+    fields:[
+      {key:'name', label:'Warehouse Name', type:'text', required:true},
+      {key:'location', label:'Location', type:'text'},
+      {key:'manager', label:'Manager', type:'text'},
+      {key:'status', label:'Status', type:'select', options:['Active','Inactive'], default:'Active'}
+    ],
+    columns:[{h:'ID',f:r=>r.id},{h:'Name',f:r=>escapeHtml(r.name)},{h:'Location',f:r=>escapeHtml(r.location||'—')},{h:'Manager',f:r=>escapeHtml(r.manager||'—')},{h:'Status',f:r=>statusBadge(r.status)}]
+  }
+};
+
+function openEntityModal(entityKey, id){
+  const cfg = entityConfigs[entityKey];
+  const record = id ? findById(state[cfg.stateKey], id) : null;
+  const fieldsHtml = cfg.fields.map(f=>{
+    const val = record ? (record[f.key]!==undefined?record[f.key]:'') : (f.default||'');
+    let input;
+    if(f.type==='select'){
+      input = '<select id="ef_'+f.key+'">'+f.options.map(o=>'<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>').join('')+'</select>';
+    } else {
+      input = '<input type="'+f.type+'" id="ef_'+f.key+'" value="'+escapeHtml(val)+'"'+(f.required?' required':'')+'>';
+    }
+    return '<div class="field'+(f.full?' full':'')+'"><label>'+f.label+(f.required?' *':'')+'</label>'+input+'</div>';
+  }).join('');
+
+  openModal(
+    '<div class="modal-head"><h3>'+(record?'Edit ':'Add ')+cfg.label+'</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>'+
+    '<form onsubmit="return saveEntity(event,\''+entityKey+'\','+(record?record.id:'null')+')">'+
+    '<div class="modal-body"><div class="form-grid">'+fieldsHtml+'</div></div>'+
+    '<div class="modal-foot"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>'+
+    '</form>'
+  );
+}
+function saveEntity(e, entityKey, id){
+  e.preventDefault();
+  const cfg = entityConfigs[entityKey];
+  const data = {};
+  for(const f of cfg.fields){
+    const el = document.getElementById('ef_'+f.key);
+    data[f.key] = el.value.trim();
+    if(f.required && !data[f.key]){ showToast('Please fill in all required fields.','error','Validation Error'); return false; }
+  }
+  // duplicate name check
+  const dupe = state[cfg.stateKey].find(r => r[cfg.nameField].toLowerCase()===data[cfg.nameField].toLowerCase() && r.id !== id);
+  if(dupe){ showToast(cfg.label+' name already exists.','error','Duplicate Entry'); return false; }
+
+  if(id){
+    const rec = findById(state[cfg.stateKey], id);
+    Object.assign(rec, data);
+    addAuditLog('UPDATE', cfg.label+'s', 'Updated '+cfg.label.toLowerCase()+' '+data[cfg.nameField]);
+    showToast(cfg.label+' updated successfully.','success');
+  } else {
+    data.id = nextId(cfg.idKey);
+    state[cfg.stateKey].push(data);
+    addAuditLog('CREATE', cfg.label+'s', 'Created '+cfg.label.toLowerCase()+' '+data[cfg.nameField]);
+    showToast(cfg.label+' created successfully.','success');
+  }
+  closeModal();
+  renderEntityTable(entityKey);
+  populateAllSelects();
+  return false;
+}
+function deleteEntity(entityKey, id){
+  const cfg = entityConfigs[entityKey];
+  if(entityKey==='categories' && state.products.some(p=>p.categoryId===id)){ showToast('Cannot delete: category is in use by products.','error'); return; }
+  if(entityKey==='brands' && state.products.some(p=>p.brandId===id)){ showToast('Cannot delete: brand is in use by products.','error'); return; }
+  if(entityKey==='units' && state.products.some(p=>p.unitId===id)){ showToast('Cannot delete: unit is in use by products.','error'); return; }
+  if(entityKey==='suppliers' && state.products.some(p=>p.supplierId===id)){ showToast('Cannot delete: supplier is in use by products.','error'); return; }
+  if(entityKey==='warehouses' && state.products.some(p=>p.warehouseId===id)){ showToast('Cannot delete: warehouse is in use by products.','error'); return; }
+  if(!confirm('Delete this '+cfg.label.toLowerCase()+'?')) return;
+  const rec = findById(state[cfg.stateKey], id);
+  state[cfg.stateKey] = state[cfg.stateKey].filter(r=>r.id!==id);
+  addAuditLog('DELETE', cfg.label+'s', 'Deleted '+cfg.label.toLowerCase()+' '+(rec?rec[cfg.nameField]:id));
+  showToast(cfg.label+' deleted successfully.','success');
+  renderEntityTable(entityKey);
+  populateAllSelects();
+}
+function renderEntityTable(entityKey){
+  const cfg = entityConfigs[entityKey];
+  const body = document.getElementById(entityKey+'Body');
+  if(!body) return;
+  const searchEl = document.getElementById(entityKey+'Search');
+  const q = searchEl ? searchEl.value.toLowerCase() : '';
+  let rows = state[cfg.stateKey];
+  if(q) rows = rows.filter(r=>JSON.stringify(r).toLowerCase().includes(q));
+  if(rows.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="'+(cfg.columns.length+1)+'">No records found.</td></tr>'; return; }
+  body.innerHTML = rows.map(r=>
+    '<tr>'+cfg.columns.map(c=>'<td>'+c.f(r)+'</td>').join('')+
+    '<td class="row-actions"><button onclick="openEntityModal(\''+entityKey+'\','+r.id+')" title="Edit">&#9998;</button><button class="del" onclick="deleteEntity(\''+entityKey+'\','+r.id+')" title="Delete">&#128465;</button></td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   PRODUCTS
+===================================================================== */
+function openProductModal(id){
+  const record = id ? findById(state.products, id) : null;
+  const html =
+    '<div class="modal-head"><h3>'+(record?'Edit ':'Add ')+'Product</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>'+
+    '<form onsubmit="return saveProduct(event,'+(record?record.id:'null')+')">'+
+    '<div class="modal-body"><div class="form-grid">'+
+      '<div class="field"><label>SKU *</label><input type="text" id="pf_sku" value="'+escapeHtml(record?record.sku:'')+'" required></div>'+
+      '<div class="field"><label>Barcode *</label><input type="text" id="pf_barcode" value="'+escapeHtml(record?record.barcode:'')+'" required></div>'+
+      '<div class="field full"><label>Product Name *</label><input type="text" id="pf_name" value="'+escapeHtml(record?record.name:'')+'" required></div>'+
+      '<div class="field"><label>Category</label><select id="pf_category">'+opts(state.categories,'id',c=>c.name,true)+'</select></div>'+
+      '<div class="field"><label>Brand</label><select id="pf_brand">'+opts(state.brands,'id',b=>b.name,true)+'</select></div>'+
+      '<div class="field"><label>Unit</label><select id="pf_unit">'+opts(state.units,'id',u=>u.name+' ('+u.abbr+')',true)+'</select></div>'+
+      '<div class="field"><label>Supplier</label><select id="pf_supplier">'+opts(state.suppliers,'id',s=>s.name,true)+'</select></div>'+
+      '<div class="field"><label>Warehouse *</label><select id="pf_warehouse" required>'+opts(state.warehouses,'id',w=>w.name,true)+'</select></div>'+
+      '<div class="field"><label>Status</label><select id="pf_status"><option value="Active"'+(record&&record.status==='Active'?' selected':'')+'>Active</option><option value="Inactive"'+(record&&record.status==='Inactive'?' selected':'')+'>Inactive</option></select></div>'+
+      '<div class="field"><label>Cost *</label><input type="number" step="0.01" min="0" id="pf_cost" value="'+(record?record.cost:'')+'" required></div>'+
+      '<div class="field"><label>Selling Price *</label><input type="number" step="0.01" min="0" id="pf_price" value="'+(record?record.price:'')+'" required></div>'+
+      '<div class="field"><label>Current Stock *</label><input type="number" min="0" id="pf_stock" value="'+(record?record.stock:'0')+'" required></div>'+
+      '<div class="field"><label>Minimum Stock *</label><input type="number" min="0" id="pf_minStock" value="'+(record?record.minStock:'0')+'" required></div>'+
+    '</div></div>'+
+    '<div class="modal-foot"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save Product</button></div>'+
+    '</form>';
+  openModal(html, true);
+  if(record){
+    document.getElementById('pf_category').value = record.categoryId||'';
+    document.getElementById('pf_brand').value = record.brandId||'';
+    document.getElementById('pf_unit').value = record.unitId||'';
+    document.getElementById('pf_supplier').value = record.supplierId||'';
+    document.getElementById('pf_warehouse').value = record.warehouseId||'';
+  }
+}
+function saveProduct(e, id){
+  e.preventDefault();
+  const sku = document.getElementById('pf_sku').value.trim();
+  const barcode = document.getElementById('pf_barcode').value.trim();
+  const name = document.getElementById('pf_name').value.trim();
+  const cost = parseFloat(document.getElementById('pf_cost').value);
+  const price = parseFloat(document.getElementById('pf_price').value);
+  const stock = parseInt(document.getElementById('pf_stock').value);
+  const minStock = parseInt(document.getElementById('pf_minStock').value);
+  const warehouseId = document.getElementById('pf_warehouse').value;
+
+  if(!sku||!barcode||!name||!warehouseId){ showToast('Please fill in all required fields.','error','Validation Error'); return false; }
+  if(cost<0||price<0){ showToast('Prices cannot be negative.','error','Validation Error'); return false; }
+  if(stock<0||minStock<0){ showToast('Stock values cannot be negative.','error','Validation Error'); return false; }
+
+  const dupeSku = state.products.find(p=>p.sku.toLowerCase()===sku.toLowerCase() && p.id!==id);
+  if(dupeSku){ showToast('A product with this SKU already exists.','error','Duplicate SKU'); return false; }
+  const dupeBarcode = state.products.find(p=>p.barcode===barcode && p.id!==id);
+  if(dupeBarcode){ showToast('A product with this barcode already exists.','error','Duplicate Barcode'); return false; }
+
+  const data = {
+    sku, barcode, name,
+    categoryId: document.getElementById('pf_category').value ? Number(document.getElementById('pf_category').value) : null,
+    brandId: document.getElementById('pf_brand').value ? Number(document.getElementById('pf_brand').value) : null,
+    unitId: document.getElementById('pf_unit').value ? Number(document.getElementById('pf_unit').value) : null,
+    supplierId: document.getElementById('pf_supplier').value ? Number(document.getElementById('pf_supplier').value) : null,
+    warehouseId: Number(warehouseId),
+    status: document.getElementById('pf_status').value,
+    cost, price, stock, minStock
+  };
+
+  if(id){
+    const rec = findById(state.products, id);
+    Object.assign(rec, data);
+    addAuditLog('UPDATE','Products','Updated product '+name);
+    showToast('Product updated successfully.','success');
+  } else {
+    data.id = nextId('product');
+    state.products.push(data);
+    addAuditLog('CREATE','Products','Created product '+name);
+    showToast('Product created successfully.','success');
+  }
+  closeModal();
+  renderProducts();
+  populateAllSelects();
+  return false;
+}
+function deleteProduct(id){
+  if(!confirm('Delete this product?')) return;
+  const rec = findById(state.products, id);
+  state.products = state.products.filter(p=>p.id!==id);
+  addAuditLog('DELETE','Products','Deleted product '+(rec?rec.name:id));
+  showToast('Product deleted successfully.','success');
+  renderProducts();
+  populateAllSelects();
+}
+function renderProducts(){
+  const body = document.getElementById('productsBody');
+  if(!body) return;
+  const q = (document.getElementById('productSearch')?.value||'').toLowerCase();
+  const catFilter = document.getElementById('productCategoryFilter')?.value;
+  const whFilter = document.getElementById('productWarehouseFilter')?.value;
+  const statusFilter = document.getElementById('productStatusFilter')?.value;
+
+  let rows = state.products;
+  if(q) rows = rows.filter(p=> p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q));
+  if(catFilter) rows = rows.filter(p=>p.categoryId===Number(catFilter));
+  if(whFilter) rows = rows.filter(p=>p.warehouseId===Number(whFilter));
+  if(statusFilter) rows = rows.filter(p=>p.status===statusFilter);
+
+  if(rows.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="13">No products found.</td></tr>'; return; }
+  body.innerHTML = rows.map(p=>{
+    const low = p.stock <= p.minStock;
+    return '<tr><td>'+escapeHtml(p.sku)+'</td><td>'+escapeHtml(p.barcode)+'</td><td>'+escapeHtml(p.name)+'</td><td>'+escapeHtml(categoryName(p.categoryId))+'</td>'+
+    '<td>'+escapeHtml(brandName(p.brandId))+'</td><td>'+escapeHtml(supplierName(p.supplierId))+'</td><td>'+escapeHtml(warehouseName(p.warehouseId))+'</td>'+
+    '<td>'+p.cost.toFixed(2)+'</td><td>'+p.price.toFixed(2)+'</td>'+
+    '<td class="'+(low?'low':'')+'">'+p.stock+'</td><td>'+p.minStock+'</td><td>'+statusBadge(p.status)+'</td>'+
+    '<td class="row-actions"><button onclick="openProductModal('+p.id+')" title="Edit">&#9998;</button><button class="del" onclick="deleteProduct('+p.id+')" title="Delete">&#128465;</button></td></tr>';
+  }).join('');
+}
+
+/* =====================================================================
+   STOCK IN / STOCK OUT
+===================================================================== */
+function submitStockIn(e){
+  e.preventDefault();
+  const productId = Number(document.getElementById('siProduct').value);
+  const warehouseId = Number(document.getElementById('siWarehouse').value);
+  const qty = parseInt(document.getElementById('siQty').value);
+  const date = document.getElementById('siDate').value;
+  let ref = document.getElementById('siRef').value.trim();
+  const remarks = document.getElementById('siRemarks').value.trim();
+
+  if(!productId||!warehouseId){ showToast('Please select a product and warehouse.','error'); return false; }
+  if(!qty || qty<=0){ showToast('Quantity must be greater than zero.','error'); return false; }
+
+  const product = findById(state.products, productId);
+  if(!ref) ref = 'SI-'+String(nextId('movement')).padStart(5,'0'); else nextId('movement');
+  product.stock += qty;
+
+  state.stockMovements.unshift({id:state.stockMovements.length+1, date, reference:ref, productId, type:'Stock In', qty, warehouseId, user:'admin', remarks});
+  addAuditLog('Stock In','Inventory','Stock in of '+qty+' units for '+product.name);
+  addNotification('Stock received: '+qty+' units of '+product.name, 'success');
+  showToast('Stock received successfully.','success');
+  document.getElementById('siRef').value=''; document.getElementById('siQty').value=''; document.getElementById('siRemarks').value='';
+  renderProducts(); renderMovements(); renderLowStock();
+  return false;
+}
+function submitStockOut(e){
+  e.preventDefault();
+  const productId = Number(document.getElementById('soProduct').value);
+  const warehouseId = Number(document.getElementById('soWarehouse').value);
+  const qty = parseInt(document.getElementById('soQty').value);
+  const date = document.getElementById('soDate').value;
+  let ref = document.getElementById('soRef').value.trim();
+  const remarks = document.getElementById('soRemarks').value.trim();
+
+  if(!productId||!warehouseId){ showToast('Please select a product and warehouse.','error'); return false; }
+  if(!qty || qty<=0){ showToast('Quantity must be greater than zero.','error'); return false; }
+
+  const product = findById(state.products, productId);
+  if(qty > product.stock){ showToast('Insufficient stock.','error'); return false; }
+
+  if(!ref) ref = 'SO-'+String(nextId('movement')).padStart(5,'0'); else nextId('movement');
+  product.stock -= qty;
+
+  state.stockMovements.unshift({id:state.stockMovements.length+1, date, reference:ref, productId, type:'Stock Out', qty, warehouseId, user:'admin', remarks});
+  addAuditLog('Stock Out','Inventory','Stock out of '+qty+' units for '+product.name);
+  addNotification('Stock issued: '+qty+' units of '+product.name, 'success');
+  showToast('Stock issued successfully.','success');
+  document.getElementById('soRef').value=''; document.getElementById('soQty').value=''; document.getElementById('soRemarks').value='';
+  renderProducts(); renderMovements(); renderLowStock();
+  return false;
+}
+
+/* =====================================================================
+   STOCK MOVEMENTS
+===================================================================== */
+function renderMovements(){
+  const body = document.getElementById('movementsBody');
+  if(!body) return;
+  const q = (document.getElementById('movSearch')?.value||'').toLowerCase();
+  const typeFilter = document.getElementById('movTypeFilter')?.value;
+  const whFilter = document.getElementById('movWarehouseFilter')?.value;
+  let rows = state.stockMovements;
+  if(q) rows = rows.filter(m=> productName(m.productId).toLowerCase().includes(q) || m.reference.toLowerCase().includes(q));
+  if(typeFilter) rows = rows.filter(m=>m.type===typeFilter);
+  if(whFilter) rows = rows.filter(m=>m.warehouseId===Number(whFilter));
+  if(rows.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="8">No stock movements found.</td></tr>'; return; }
+  body.innerHTML = rows.map(m=>
+    '<tr><td>'+m.date+'</td><td>'+escapeHtml(m.reference)+'</td><td>'+escapeHtml(productName(m.productId))+'</td><td>'+movementTypeBadge(m.type)+'</td><td>'+m.qty+'</td><td>'+escapeHtml(warehouseName(m.warehouseId))+'</td><td>'+escapeHtml(m.user)+'</td><td>'+escapeHtml(m.remarks||'—')+'</td></tr>'
+  ).join('');
+}
+function movementTypeBadge(type){
+  const map = {'Stock In':'badge-success','Stock Out':'badge-danger','Transfer In':'badge-info','Transfer Out':'badge-warning','Adjustment':'badge-muted','Goods Received':'badge-success'};
+  return '<span class="badge '+(map[type]||'badge-muted')+'">'+type+'</span>';
+}
+
+/* =====================================================================
+   BARCODE
+===================================================================== */
+function lookupBarcode(){
+  const code = document.getElementById('barcodeInput').value.trim();
+  const resultBox = document.getElementById('barcodeResult');
+  if(!code){ showToast('Please enter a barcode.','error'); return; }
+  const product = state.products.find(p=>p.barcode===code);
+  if(!product){
+    resultBox.innerHTML = '<div class="error-msg" style="display:block;">Invalid barcode. No matching product found.</div>';
+    showToast('Invalid barcode.','error');
+    return;
+  }
+  const low = product.stock <= product.minStock;
+  resultBox.innerHTML =
+    '<div class="panel" style="margin-top:16px;"><div class="panel-body">'+
+    '<div class="form-grid">'+
+      '<div><div class="helper">Product Name</div><strong>'+escapeHtml(product.name)+'</strong></div>'+
+      '<div><div class="helper">SKU</div><strong>'+escapeHtml(product.sku)+'</strong></div>'+
+      '<div><div class="helper">Category</div>'+escapeHtml(categoryName(product.categoryId))+'</div>'+
+      '<div><div class="helper">Warehouse</div>'+escapeHtml(warehouseName(product.warehouseId))+'</div>'+
+      '<div><div class="helper">Current Stock</div><span class="'+(low?'low':'')+'">'+product.stock+'</span></div>'+
+      '<div><div class="helper">Selling Price</div>'+product.price.toFixed(2)+'</div>'+
+    '</div></div></div>';
+}
+
+/* =====================================================================
+   LOW STOCK
+===================================================================== */
+function renderLowStock(){
+  const body = document.getElementById('lowStockBody');
+  if(!body) return;
+  const rows = state.products.filter(p=>p.stock<=p.minStock);
+  if(rows.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="6">No low-stock products. Everything looks good.</td></tr>'; return; }
+  body.innerHTML = rows.map(p=>
+    '<tr><td>'+escapeHtml(p.name)+'</td><td>'+escapeHtml(p.sku)+'</td><td class="low">'+p.stock+'</td><td>'+p.minStock+'</td><td>'+escapeHtml(warehouseName(p.warehouseId))+'</td><td><span class="badge badge-danger">Low Stock</span></td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   PURCHASE ORDERS
+===================================================================== */
+let poItemsDraft = [];
+function openPOModal(id){
+  const record = id ? findById(state.purchaseOrders, id) : null;
+  poItemsDraft = record ? JSON.parse(JSON.stringify(record.items)) : [];
+  const html =
+    '<div class="modal-head"><h3>'+(record?'Edit ':'Create ')+'Purchase Order</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>'+
+    '<div class="modal-body">'+
+      '<div class="form-grid">'+
+        '<div class="field"><label>PO Number</label><input type="text" id="pof_number" value="'+(record?escapeHtml(record.poNumber):'')+'" placeholder="Auto-generated if blank"></div>'+
+        '<div class="field"><label>Supplier *</label><select id="pof_supplier">'+opts(state.suppliers,'id',s=>s.name,true)+'</select></div>'+
+        '<div class="field"><label>Date *</label><input type="date" id="pof_date" value="'+(record?record.date:todayStr())+'" required></div>'+
+        '<div class="field"><label>Expected Date</label><input type="date" id="pof_expected" value="'+(record?record.expectedDate||'':'')+'"></div>'+
+        '<div class="field"><label>Status</label><select id="pof_status">'+['Draft','Pending','Approved','Received','Cancelled'].map(s=>'<option'+(record&&record.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select></div>'+
+      '</div>'+
+      '<div class="section-sub">Items</div>'+
+      '<div class="table-wrap"><table class="po-items-table"><thead><tr><th>Product</th><th>Qty</th><th>Unit Cost</th><th>Total</th><th></th></tr></thead><tbody id="poItemsBody"></tbody></table></div>'+
+      '<button type="button" class="btn btn-secondary btn-sm" style="margin-top:8px;" onclick="addPOItemRow()">+ Add Item</button>'+
+      '<div style="text-align:right;margin-top:14px;font-size:14px;"><div>Subtotal: <strong id="poSubtotalDisplay">0.00</strong></div><div>Grand Total: <strong id="poTotalDisplay">0.00</strong></div></div>'+
+    '</div>'+
+    '<div class="modal-foot"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="button" class="btn btn-primary" onclick="savePO('+(record?record.id:'null')+')">Save Purchase Order</button></div>';
+  openModal(html, true);
+  if(record) document.getElementById('pof_supplier').value = record.supplierId;
+  renderPOItemsRows();
+}
+function addPOItemRow(){
+  poItemsDraft.push({productId:'', qty:1, unitCost:0});
+  renderPOItemsRows();
+}
+function removePOItemRow(idx){ poItemsDraft.splice(idx,1); renderPOItemsRows(); }
+function renderPOItemsRows(){
+  const body = document.getElementById('poItemsBody');
+  if(poItemsDraft.length===0){ body.innerHTML = '<tr class="empty-row"><td colspan="5">No items added yet.</td></tr>'; updatePOTotals(); return; }
+  body.innerHTML = poItemsDraft.map((it,idx)=>
+    '<tr>'+
+    '<td><select onchange="poItemsDraft['+idx+'].productId=this.value">'+opts(state.products,'id',p=>p.name,true)+'</select></td>'+
+    '<td><input type="number" min="1" value="'+it.qty+'" onchange="poItemsDraft['+idx+'].qty=parseInt(this.value)||1;updatePOTotals();"></td>'+
+    '<td><input type="number" min="0" step="0.01" value="'+it.unitCost+'" onchange="poItemsDraft['+idx+'].unitCost=parseFloat(this.value)||0;updatePOTotals();"></td>'+
+    '<td>'+(it.qty*it.unitCost).toFixed(2)+'</td>'+
+    '<td><button type="button" class="btn btn-secondary btn-sm" onclick="removePOItemRow('+idx+')">&times;</button></td>'+
+    '</tr>'
+  ).join('');
+  [...body.querySelectorAll('select')].forEach((sel,idx)=>{ sel.value = poItemsDraft[idx].productId; });
+  updatePOTotals();
+}
+function updatePOTotals(){
+  const subtotal = poItemsDraft.reduce((s,it)=>s+(it.qty*it.unitCost),0);
+  const disp1 = document.getElementById('poSubtotalDisplay'); if(disp1) disp1.textContent = subtotal.toFixed(2);
+  const disp2 = document.getElementById('poTotalDisplay'); if(disp2) disp2.textContent = subtotal.toFixed(2);
+}
+function savePO(id){
+  const supplierId = document.getElementById('pof_supplier').value;
+  const date = document.getElementById('pof_date').value;
+  const expectedDate = document.getElementById('pof_expected').value;
+  const status = document.getElementById('pof_status').value;
+  let poNumber = document.getElementById('pof_number').value.trim();
+
+  if(!supplierId){ showToast('Please select a supplier.','error'); return; }
+  if(poItemsDraft.length===0 || poItemsDraft.some(it=>!it.productId||it.qty<=0)){ showToast('Please add at least one valid item with quantity greater than zero.','error'); return; }
+
+  const items = poItemsDraft.map(it=>({productId:Number(it.productId), qty:it.qty, unitCost:it.unitCost, total:it.qty*it.unitCost}));
+  const subtotal = items.reduce((s,it)=>s+it.total,0);
+
+  if(id){
+    const rec = findById(state.purchaseOrders, id);
+    Object.assign(rec, {supplierId:Number(supplierId), date, expectedDate, status, items, subtotal, total:subtotal});
+    addAuditLog('UPDATE','Purchase Orders','Updated PO '+rec.poNumber);
+    showToast('Purchase order updated successfully.','success');
+  } else {
+    if(!poNumber) poNumber = 'PO-'+String(nextId('po')).padStart(5,'0'); else nextId('po');
+    state.purchaseOrders.unshift({id:state.purchaseOrders.length? Math.max(...state.purchaseOrders.map(p=>p.id))+1:1, poNumber, supplierId:Number(supplierId), date, expectedDate, status, items, subtotal, total:subtotal});
+    addAuditLog('Purchase Order','Purchase Orders','Created PO '+poNumber);
+    addNotification('Purchase order created: '+poNumber,'info');
+    showToast('Purchase order created successfully.','success');
+  }
+  closeModal();
+  renderPOs();
+}
+function deletePO(id){
+  if(!confirm('Delete this purchase order?')) return;
+  const rec = findById(state.purchaseOrders, id);
+  state.purchaseOrders = state.purchaseOrders.filter(p=>p.id!==id);
+  addAuditLog('DELETE','Purchase Orders','Deleted PO '+(rec?rec.poNumber:id));
+  showToast('Purchase order deleted successfully.','success');
+  renderPOs();
+}
+function changePOStatus(id, status){
+  const rec = findById(state.purchaseOrders, id);
+  rec.status = status;
+  addAuditLog('UPDATE','Purchase Orders','Changed status of PO '+rec.poNumber+' to '+status);
+  showToast('PO status updated to '+status+'.','success');
+  renderPOs();
+}
+function renderPOs(){
+  const body = document.getElementById('poBody');
+  if(!body) return;
+  const q = (document.getElementById('poSearch')?.value||'').toLowerCase();
+  const statusFilter = document.getElementById('poStatusFilter')?.value;
+  let rows = state.purchaseOrders;
+  if(q) rows = rows.filter(p=> p.poNumber.toLowerCase().includes(q) || supplierName(p.supplierId).toLowerCase().includes(q));
+  if(statusFilter) rows = rows.filter(p=>p.status===statusFilter);
+  if(rows.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="7">No purchase orders found.</td></tr>'; return; }
+  const statuses = ['Draft','Pending','Approved','Received','Cancelled'];
+  body.innerHTML = rows.map(p=>
+    '<tr><td>'+escapeHtml(p.poNumber)+'</td><td>'+escapeHtml(supplierName(p.supplierId))+'</td><td>'+p.date+'</td><td>'+(p.expectedDate||'—')+'</td><td>'+p.total.toFixed(2)+'</td>'+
+    '<td>'+poStatusBadge(p.status)+' <select onchange="changePOStatus('+p.id+',this.value)" style="margin-left:4px;font-size:11px;padding:2px;">'+statuses.map(s=>'<option'+(p.status===s?' selected':'')+'>'+s+'</option>').join('')+'</select></td>'+
+    '<td class="row-actions"><button onclick="openPOModal('+p.id+')" title="Edit">&#9998;</button><button class="del" onclick="deletePO('+p.id+')" title="Delete">&#128465;</button></td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   GOODS RECEIVING
+===================================================================== */
+let receivingItemsDraft = [];
+function openReceivingModal(){
+  receivingItemsDraft = [];
+  const html =
+    '<div class="modal-head"><h3>Receive Goods</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>'+
+    '<div class="modal-body">'+
+      '<div class="form-grid">'+
+        '<div class="field"><label>Receiving Number</label><input type="text" id="grf_number" placeholder="Auto-generated if blank"></div>'+
+        '<div class="field"><label>Purchase Order *</label><select id="grf_po" onchange="loadPOItemsForReceiving()">'+opts(state.purchaseOrders.filter(p=>p.status!=='Cancelled'&&p.status!=='Received'),'id',p=>p.poNumber,true)+'</select></div>'+
+        '<div class="field"><label>Warehouse *</label><select id="grf_warehouse">'+opts(state.warehouses,'id',w=>w.name,true)+'</select></div>'+
+        '<div class="field"><label>Date *</label><input type="date" id="grf_date" value="'+todayStr()+'" required></div>'+
+        '<div class="field full"><label>Remarks</label><input type="text" id="grf_remarks"></div>'+
+      '</div>'+
+      '<div class="section-sub">Items</div>'+
+      '<div class="table-wrap"><table class="po-items-table"><thead><tr><th>Product</th><th>Ordered Qty</th><th>Received Qty</th></tr></thead><tbody id="grItemsBody"></tbody></table></div>'+
+    '</div>'+
+    '<div class="modal-foot"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="button" class="btn btn-primary" onclick="saveReceiving()">Confirm Receipt</button></div>';
+  openModal(html, true);
+}
+function loadPOItemsForReceiving(){
+  const poId = Number(document.getElementById('grf_po').value);
+  const po = findById(state.purchaseOrders, poId);
+  receivingItemsDraft = po ? po.items.map(it=>({productId:it.productId, orderedQty:it.qty, receivedQty:it.qty})) : [];
+  const body = document.getElementById('grItemsBody');
+  if(receivingItemsDraft.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="3">Select a purchase order to load items.</td></tr>'; return; }
+  body.innerHTML = receivingItemsDraft.map((it,idx)=>
+    '<tr><td>'+escapeHtml(productName(it.productId))+'</td><td>'+it.orderedQty+'</td>'+
+    '<td><input type="number" min="0" value="'+it.receivedQty+'" onchange="receivingItemsDraft['+idx+'].receivedQty=parseInt(this.value)||0;"></td></tr>'
+  ).join('');
+}
+function saveReceiving(){
+  const poId = document.getElementById('grf_po').value;
+  const warehouseId = document.getElementById('grf_warehouse').value;
+  const date = document.getElementById('grf_date').value;
+  let number = document.getElementById('grf_number').value.trim();
+  const remarks = document.getElementById('grf_remarks').value.trim();
+  if(!poId||!warehouseId){ showToast('Please select a purchase order and warehouse.','error'); return; }
+  if(receivingItemsDraft.length===0){ showToast('No items to receive.','error'); return; }
+
+  if(!number) number = 'GR-'+String(nextId('receipt')).padStart(5,'0'); else nextId('receipt');
+  const po = findById(state.purchaseOrders, Number(poId));
+
+  receivingItemsDraft.forEach(it=>{
+    if(it.receivedQty<=0) return;
+    const product = findById(state.products, it.productId);
+    if(product){ product.stock += it.receivedQty; }
+    state.stockMovements.unshift({id:state.stockMovements.length+1, date, reference:number, productId:it.productId, type:'Goods Received', qty:it.receivedQty, warehouseId:Number(warehouseId), user:'admin', remarks});
+  });
+
+  state.goodsReceipts.unshift({id:state.goodsReceipts.length+1, receivingNumber:number, poId:Number(poId), supplierId:po.supplierId, warehouseId:Number(warehouseId), date, items:JSON.parse(JSON.stringify(receivingItemsDraft)), remarks});
+  po.status = 'Received';
+
+  addAuditLog('Goods Receiving','Goods Receiving','Received goods for PO '+po.poNumber);
+  addNotification('Goods received for PO '+po.poNumber,'success');
+  showToast('Goods received successfully.','success');
+  closeModal();
+  renderReceiving(); renderProducts(); renderMovements(); renderPOs(); renderLowStock();
+}
+function renderReceiving(){
+  const body = document.getElementById('receivingBody');
+  if(!body) return;
+  if(state.goodsReceipts.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="6">No goods receiving records yet.</td></tr>'; return; }
+  body.innerHTML = state.goodsReceipts.map(g=>
+    '<tr><td>'+escapeHtml(g.receivingNumber)+'</td><td>'+escapeHtml(findById(state.purchaseOrders,g.poId)?.poNumber||'—')+'</td><td>'+escapeHtml(supplierName(g.supplierId))+'</td><td>'+escapeHtml(warehouseName(g.warehouseId))+'</td><td>'+g.date+'</td><td>'+escapeHtml(g.remarks||'—')+'</td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   SUPPLIER PURCHASE HISTORY
+===================================================================== */
+function renderSupplierHistory(){
+  const body = document.getElementById('supplierHistBody');
+  if(!body) return;
+  const filter = document.getElementById('supHistFilter')?.value;
+  let rows = [];
+  state.purchaseOrders.forEach(po=>{
+    po.items.forEach(it=>{
+      rows.push({date:po.date, supplierId:po.supplierId, poNumber:po.poNumber, productId:it.productId, qty:it.qty, unitCost:it.unitCost, total:it.total, status:po.status});
+    });
+  });
+  if(filter) rows = rows.filter(r=>r.supplierId===Number(filter));
+  if(rows.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="8">No purchase history found.</td></tr>'; return; }
+  body.innerHTML = rows.map(r=>
+    '<tr><td>'+r.date+'</td><td>'+escapeHtml(supplierName(r.supplierId))+'</td><td>'+escapeHtml(r.poNumber)+'</td><td>'+escapeHtml(productName(r.productId))+'</td><td>'+r.qty+'</td><td>'+r.unitCost.toFixed(2)+'</td><td>'+r.total.toFixed(2)+'</td><td>'+poStatusBadge(r.status)+'</td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   STOCK TRANSFERS
+===================================================================== */
+function submitTransfer(e){
+  e.preventDefault();
+  const productId = Number(document.getElementById('trProduct').value);
+  const fromId = Number(document.getElementById('trFrom').value);
+  const toId = Number(document.getElementById('trTo').value);
+  const qty = parseInt(document.getElementById('trQty').value);
+  const date = document.getElementById('trDate').value;
+  let number = document.getElementById('trNumber').value.trim();
+  const remarks = document.getElementById('trRemarks').value.trim();
+
+  if(!productId||!fromId||!toId){ showToast('Please complete all required fields.','error'); return false; }
+  if(fromId===toId){ showToast('Source and destination warehouses cannot be the same.','error'); return false; }
+  if(!qty||qty<=0){ showToast('Quantity must be greater than zero.','error'); return false; }
+
+  const product = findById(state.products, productId);
+  if(qty>product.stock){ showToast('Insufficient stock.','error'); return false; }
+
+  if(!number) number = 'TR-'+String(nextId('transfer')).padStart(5,'0'); else nextId('transfer');
+
+  product.stock -= qty; // deduct from source (single-stock-field model)
+  // simulate destination receiving stock — since product stock is tracked as one figure, we still add back for destination if it's a different logical count.
+  product.stock += qty; // net stock unchanged (transfer within total inventory), warehouseId reference kept as informational
+  // For MVP: reassign warehouse if product only exists in one location conceptually is not accurate, so we log both movements while keeping total stock consistent.
+
+  state.stockMovements.unshift({id:state.stockMovements.length+1, date, reference:number, productId, type:'Transfer Out', qty, warehouseId:fromId, user:'admin', remarks});
+  state.stockMovements.unshift({id:state.stockMovements.length+2, date, reference:number, productId, type:'Transfer In', qty, warehouseId:toId, user:'admin', remarks});
+  state.transfers.unshift({id:state.transfers.length+1, transferNumber:number, date, productId, fromWarehouseId:fromId, toWarehouseId:toId, qty, remarks});
+
+  addAuditLog('Transfer','Stock Transfers','Transferred '+qty+' units of '+product.name+' from '+warehouseName(fromId)+' to '+warehouseName(toId));
+  addNotification('Transfer completed: '+qty+' units of '+product.name,'success');
+  showToast('Transfer completed successfully.','success');
+
+  document.getElementById('trNumber').value=''; document.getElementById('trQty').value=''; document.getElementById('trRemarks').value='';
+  renderTransfers(); renderMovements(); renderProducts();
+  return false;
+}
+function renderTransfers(){
+  const body = document.getElementById('transfersBody');
+  if(!body) return;
+  if(state.transfers.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="7">No transfers recorded yet.</td></tr>'; return; }
+  body.innerHTML = state.transfers.map(t=>
+    '<tr><td>'+escapeHtml(t.transferNumber)+'</td><td>'+t.date+'</td><td>'+escapeHtml(productName(t.productId))+'</td><td>'+escapeHtml(warehouseName(t.fromWarehouseId))+'</td><td>'+escapeHtml(warehouseName(t.toWarehouseId))+'</td><td>'+t.qty+'</td><td>'+escapeHtml(t.remarks||'—')+'</td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   INVENTORY COUNTING
+===================================================================== */
+function updateCountSystemQty(){
+  const productId = document.getElementById('cnProduct')?.value;
+  const el = document.getElementById('cnSystemQty');
+  if(!el) return;
+  const product = productId ? findById(state.products, Number(productId)) : null;
+  el.value = product ? product.stock : '';
+}
+function submitCount(e){
+  e.preventDefault();
+  const warehouseId = Number(document.getElementById('cnWarehouse').value);
+  const productId = Number(document.getElementById('cnProduct').value);
+  const systemQty = parseInt(document.getElementById('cnSystemQty').value)||0;
+  const physicalQty = parseInt(document.getElementById('cnPhysicalQty').value);
+  let number = document.getElementById('cnNumber').value.trim();
+  const remarks = document.getElementById('cnRemarks').value.trim();
+
+  if(!warehouseId||!productId){ showToast('Please complete all required fields.','error'); return false; }
+  if(physicalQty<0){ showToast('Physical quantity cannot be negative.','error'); return false; }
+
+  if(!number) number = 'CNT-'+String(nextId('count')).padStart(5,'0'); else nextId('count');
+  const difference = physicalQty - systemQty;
+
+  state.inventoryCounts.unshift({id:state.inventoryCounts.length+1, countingNumber:number, warehouseId, productId, systemQty, physicalQty, difference, remarks, adjusted:false});
+  addAuditLog('Inventory Count','Inventory Counting','Counted '+productName(productId)+' — difference: '+difference);
+  showToast('Inventory count submitted.','success');
+
+  document.getElementById('cnNumber').value=''; document.getElementById('cnPhysicalQty').value=''; document.getElementById('cnRemarks').value='';
+  renderCounting();
+  return false;
+}
+function confirmCountAdjustment(id){
+  const rec = findById(state.inventoryCounts, id);
+  if(!rec || rec.adjusted) return;
+  if(!confirm('Apply this count as a stock adjustment? This will update the system stock to match the physical count.')) return;
+  const product = findById(state.products, rec.productId);
+  const diff = rec.difference;
+  if(diff===0){ showToast('No difference to adjust.','warning'); return; }
+  const newStock = product.stock + diff;
+  if(newStock<0){ showToast('Adjustment would result in negative stock.','error'); return; }
+  product.stock = newStock;
+  rec.adjusted = true;
+  state.stockMovements.unshift({id:state.stockMovements.length+1, date:todayStr(), reference:rec.countingNumber, productId:rec.productId, type:'Adjustment', qty:Math.abs(diff), warehouseId:rec.warehouseId, user:'admin', remarks:'Inventory count adjustment'});
+  addAuditLog('Adjustment','Inventory Counting','Applied count adjustment for '+product.name+' ('+(diff>0?'+':'')+diff+')');
+  addNotification('Stock adjustment made from inventory count for '+product.name,'success');
+  showToast('Stock adjustment applied.','success');
+  renderCounting(); renderProducts(); renderMovements(); renderLowStock();
+}
+function renderCounting(){
+  const body = document.getElementById('countingBody');
+  if(!body) return;
+  if(state.inventoryCounts.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="8">No counts recorded yet.</td></tr>'; return; }
+  body.innerHTML = state.inventoryCounts.map(c=>{
+    let resultBadge, diffClass;
+    if(c.difference===0){ resultBadge='<span class="badge badge-success">Matches</span>'; diffClass='diff-zero'; }
+    else if(c.difference<0){ resultBadge='<span class="badge badge-danger">Shortage</span>'; diffClass='diff-neg'; }
+    else { resultBadge='<span class="badge badge-info">Excess</span>'; diffClass='diff-pos'; }
+    return '<tr><td>'+escapeHtml(c.countingNumber)+'</td><td>'+escapeHtml(warehouseName(c.warehouseId))+'</td><td>'+escapeHtml(productName(c.productId))+'</td><td>'+c.systemQty+'</td><td>'+c.physicalQty+'</td>'+
+    '<td class="'+diffClass+'">'+(c.difference>0?'+':'')+c.difference+'</td><td>'+resultBadge+'</td>'+
+    '<td>'+(c.adjusted?'<span class="badge badge-muted">Adjusted</span>':(c.difference!==0?'<button class="btn btn-secondary btn-sm" onclick="confirmCountAdjustment('+c.id+')">Adjust Stock</button>':'—'))+'</td></tr>';
+  }).join('');
+}
+
+/* =====================================================================
+   STOCK ADJUSTMENTS
+===================================================================== */
+function updateAdjCurrentStock(){
+  const productId = document.getElementById('adjProduct')?.value;
+  const el = document.getElementById('adjCurrentStock');
+  if(!el) return;
+  const product = productId ? findById(state.products, Number(productId)) : null;
+  el.value = product ? product.stock : '';
+}
+function submitAdjustment(e){
+  e.preventDefault();
+  const warehouseId = Number(document.getElementById('adjWarehouse').value);
+  const productId = Number(document.getElementById('adjProduct').value);
+  const type = document.getElementById('adjType').value;
+  const qty = parseInt(document.getElementById('adjQty').value);
+  const date = document.getElementById('adjDate').value;
+  let number = document.getElementById('adjNumber').value.trim();
+  const reason = document.getElementById('adjReason').value.trim();
+
+  if(!warehouseId||!productId){ showToast('Please complete all required fields.','error'); return false; }
+  if(!qty||qty<=0){ showToast('Adjustment quantity must be greater than zero.','error'); return false; }
+  if(!reason){ showToast('Please provide a reason for the adjustment.','error'); return false; }
+
+  const product = findById(state.products, productId);
+  const newStock = type==='Increase' ? product.stock+qty : product.stock-qty;
+  if(newStock<0){ showToast('Adjustment would result in negative stock.','error'); return false; }
+
+  if(!number) number = 'ADJ-'+String(nextId('adjustment')).padStart(5,'0'); else nextId('adjustment');
+  const currentStock = product.stock;
+  product.stock = newStock;
+
+  state.adjustments.unshift({id:state.adjustments.length+1, adjustmentNumber:number, date, warehouseId, productId, currentStock, adjQty:qty, type, reason});
+  state.stockMovements.unshift({id:state.stockMovements.length+1, date, reference:number, productId, type:'Adjustment', qty, warehouseId, user:'admin', remarks:reason});
+
+  addAuditLog('Adjustment','Stock Adjustments', type+' adjustment of '+qty+' units for '+product.name+' — '+reason);
+  addNotification('Stock adjustment made: '+type+' of '+qty+' units for '+product.name,'success');
+  showToast('Stock adjustment submitted.','success');
+
+  document.getElementById('adjNumber').value=''; document.getElementById('adjQty').value=''; document.getElementById('adjReason').value='';
+  renderAdjustments(); renderProducts(); renderMovements(); renderLowStock(); updateAdjCurrentStock();
+  return false;
+}
+function renderAdjustments(){
+  const body = document.getElementById('adjustmentsBody');
+  if(!body) return;
+  if(state.adjustments.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="7">No adjustments recorded yet.</td></tr>'; return; }
+  body.innerHTML = state.adjustments.map(a=>
+    '<tr><td>'+escapeHtml(a.adjustmentNumber)+'</td><td>'+a.date+'</td><td>'+escapeHtml(warehouseName(a.warehouseId))+'</td><td>'+escapeHtml(productName(a.productId))+'</td>'+
+    '<td>'+(a.type==='Increase'?'<span class="badge badge-success">Increase</span>':'<span class="badge badge-danger">Decrease</span>')+'</td><td>'+a.adjQty+'</td><td>'+escapeHtml(a.reason)+'</td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   DASHBOARD
+===================================================================== */
+function renderDashboard(){
+  const totalProducts = state.products.length;
+  const totalStock = state.products.reduce((s,p)=>s+p.stock,0);
+  const lowStockCount = state.products.filter(p=>p.stock<=p.minStock).length;
+  const totalSuppliers = state.suppliers.length;
+  const totalWarehouses = state.warehouses.length;
+  const pendingPOs = state.purchaseOrders.filter(p=>p.status==='Pending'||p.status==='Draft'||p.status==='Approved').length;
+
+  const cards = [
+    {label:'Total Products', val:totalProducts, ic:'&#128230;', bg:'var(--info-bg)', color:'var(--info)'},
+    {label:'Total Stock', val:totalStock, ic:'&#128200;', bg:'var(--success-bg)', color:'var(--success)'},
+    {label:'Low Stock Items', val:lowStockCount, ic:'&#9888;', bg:'var(--warning-bg)', color:'var(--warning)'},
+    {label:'Total Suppliers', val:totalSuppliers, ic:'&#128100;', bg:'var(--info-bg)', color:'var(--info)'},
+    {label:'Total Warehouses', val:totalWarehouses, ic:'&#127970;', bg:'var(--info-bg)', color:'var(--info)'},
+    {label:'Pending Purchase Orders', val:pendingPOs, ic:'&#128203;', bg:'var(--warning-bg)', color:'var(--warning)'}
+  ];
+  document.getElementById('dashCards').innerHTML = cards.map(c=>
+    '<div class="stat-card"><div class="top"><div class="ic" style="background:'+c.bg+';color:'+c.color+';">'+c.ic+'</div></div><div class="val">'+c.val+'</div><div class="lbl">'+c.label+'</div></div>'
+  ).join('');
+
+  const movBody = document.getElementById('dashMovementsBody');
+  const recentMoves = state.stockMovements.slice(0,6);
+  movBody.innerHTML = recentMoves.length ? recentMoves.map(m=>
+    '<tr><td>'+m.date+'</td><td>'+escapeHtml(productName(m.productId))+'</td><td>'+movementTypeBadge(m.type)+'</td><td>'+m.qty+'</td><td>'+escapeHtml(warehouseName(m.warehouseId))+'</td><td>'+escapeHtml(m.user)+'</td></tr>'
+  ).join('') : '<tr class="empty-row"><td colspan="6">No stock movements yet.</td></tr>';
+
+  const lowBody = document.getElementById('dashLowStockBody');
+  const lowRows = state.products.filter(p=>p.stock<=p.minStock).slice(0,6);
+  lowBody.innerHTML = lowRows.length ? lowRows.map(p=>
+    '<tr><td>'+escapeHtml(p.name)+'</td><td>'+escapeHtml(p.sku)+'</td><td class="low">'+p.stock+'</td><td>'+p.minStock+'</td><td><span class="badge badge-danger">Low Stock</span></td></tr>'
+  ).join('') : '<tr class="empty-row"><td colspan="5">No low-stock products.</td></tr>';
+
+  const actBody = document.getElementById('dashActivityBody');
+  const recentActivity = state.auditLogs.slice(0,8);
+  actBody.innerHTML = recentActivity.length ? recentActivity.map(a=>
+    '<tr><td>'+a.date+'</td><td>'+escapeHtml(a.user)+'</td><td>'+escapeHtml(a.action)+'</td><td>'+escapeHtml(a.module)+'</td><td>'+escapeHtml(a.description)+'</td></tr>'
+  ).join('') : '<tr class="empty-row"><td colspan="5">No recent activity.</td></tr>';
+
+  renderNotifBell();
+}
+
+/* =====================================================================
+   REPORTS
+===================================================================== */
+function renderReports(){
+  const prodFilter = document.getElementById('reportProductFilter')?.value;
+  const whFilter = document.getElementById('reportWarehouseFilter')?.value;
+  const supFilter = document.getElementById('reportSupplierFilter')?.value;
+
+  let invRows = state.products;
+  if(prodFilter) invRows = invRows.filter(p=>p.id===Number(prodFilter));
+  if(whFilter) invRows = invRows.filter(p=>p.warehouseId===Number(whFilter));
+  if(supFilter) invRows = invRows.filter(p=>p.supplierId===Number(supFilter));
+  const invBody = document.getElementById('reportInventoryBody');
+  invBody.innerHTML = invRows.length ? invRows.map(p=>
+    '<tr><td>'+escapeHtml(p.name)+'</td><td>'+escapeHtml(p.sku)+'</td><td>'+escapeHtml(warehouseName(p.warehouseId))+'</td><td>'+p.stock+'</td><td>'+p.minStock+'</td><td>'+(p.stock<=p.minStock?'<span class="badge badge-danger">Low</span>':'<span class="badge badge-success">OK</span>')+'</td></tr>'
+  ).join('') : '<tr class="empty-row"><td colspan="6">No records found.</td></tr>';
+
+  let movRows = state.stockMovements;
+  if(prodFilter) movRows = movRows.filter(m=>m.productId===Number(prodFilter));
+  if(whFilter) movRows = movRows.filter(m=>m.warehouseId===Number(whFilter));
+  const movBody = document.getElementById('reportMovementBody');
+  movBody.innerHTML = movRows.length ? movRows.map(m=>
+    '<tr><td>'+m.date+'</td><td>'+escapeHtml(productName(m.productId))+'</td><td>'+movementTypeBadge(m.type)+'</td><td>'+m.qty+'</td><td>'+escapeHtml(warehouseName(m.warehouseId))+'</td></tr>'
+  ).join('') : '<tr class="empty-row"><td colspan="5">No records found.</td></tr>';
+
+  let poRows = state.purchaseOrders;
+  if(supFilter) poRows = poRows.filter(p=>p.supplierId===Number(supFilter));
+  const poBody = document.getElementById('reportPurchaseBody');
+  poBody.innerHTML = poRows.length ? poRows.map(p=>
+    '<tr><td>'+escapeHtml(p.poNumber)+'</td><td>'+escapeHtml(supplierName(p.supplierId))+'</td><td>'+p.date+'</td><td>'+p.total.toFixed(2)+'</td><td>'+poStatusBadge(p.status)+'</td></tr>'
+  ).join('') : '<tr class="empty-row"><td colspan="5">No records found.</td></tr>';
+}
+function exportCSV(type){
+  let rows = [], filename='';
+  if(type==='inventory'){
+    filename='inventory_report.csv';
+    rows = [['Product','SKU','Warehouse','Current Stock','Minimum Stock','Status']];
+    state.products.forEach(p=>rows.push([p.name,p.sku,warehouseName(p.warehouseId),p.stock,p.minStock,p.stock<=p.minStock?'Low':'OK']));
+  } else if(type==='movement'){
+    filename='stock_movement_report.csv';
+    rows = [['Date','Product','Movement Type','Quantity','Warehouse']];
+    state.stockMovements.forEach(m=>rows.push([m.date,productName(m.productId),m.type,m.qty,warehouseName(m.warehouseId)]));
+  } else if(type==='purchase'){
+    filename='purchase_report.csv';
+    rows = [['PO','Supplier','Date','Total','Status']];
+    state.purchaseOrders.forEach(p=>rows.push([p.poNumber,supplierName(p.supplierId),p.date,p.total.toFixed(2),p.status]));
+  }
+  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('CSV exported successfully.','success');
+}
+
+/* =====================================================================
+   ANALYTICS
+===================================================================== */
+let chartInstances = {};
+function renderAnalytics(){
+  const totalProducts = state.products.length;
+  const totalQty = state.products.reduce((s,p)=>s+p.stock,0);
+  const totalIn = state.stockMovements.filter(m=>m.type==='Stock In'||m.type==='Goods Received').reduce((s,m)=>s+m.qty,0);
+  const totalOut = state.stockMovements.filter(m=>m.type==='Stock Out').reduce((s,m)=>s+m.qty,0);
+  const lowCount = state.products.filter(p=>p.stock<=p.minStock).length;
+  const totalPO = state.purchaseOrders.length;
+  const pendingPO = state.purchaseOrders.filter(p=>p.status==='Pending'||p.status==='Draft'||p.status==='Approved').length;
+  const totalSuppliers = state.suppliers.length;
+
+  const cards = [
+    {label:'Total Products', val:totalProducts},
+    {label:'Total Inventory Quantity', val:totalQty},
+    {label:'Total Stock In', val:totalIn},
+    {label:'Total Stock Out', val:totalOut},
+    {label:'Low Stock Count', val:lowCount},
+    {label:'Total Purchase Orders', val:totalPO},
+    {label:'Pending Purchase Orders', val:pendingPO},
+    {label:'Total Suppliers', val:totalSuppliers}
+  ];
+  document.getElementById('analyticsCards').innerHTML = cards.map(c=>
+    '<div class="stat-card"><div class="val">'+c.val+'</div><div class="lbl">'+c.label+'</div></div>'
+  ).join('');
+
+  const isDark = document.documentElement.getAttribute('data-theme')==='dark';
+  const gridColor = isDark ? '#2a3150' : '#e5e8f0';
+  const textColor = isDark ? '#c7cbe0' : '#444a63';
+  Chart.defaults.color = textColor;
+  Chart.defaults.borderColor = gridColor;
+
+  destroyChart('chartInOut');
+  chartInstances.chartInOut = new Chart(document.getElementById('chartInOut'), {
+    type:'bar',
+    data:{labels:['Stock In','Stock Out'], datasets:[{label:'Units', data:[totalIn,totalOut], backgroundColor:['#33c98a','#f0666e']}]},
+    options:{plugins:{legend:{display:false}}, responsive:true}
+  });
+
+  destroyChart('chartByWarehouse');
+  const whLabels = state.warehouses.map(w=>w.name);
+  const whData = state.warehouses.map(w=>state.products.filter(p=>p.warehouseId===w.id).reduce((s,p)=>s+p.stock,0));
+  chartInstances.chartByWarehouse = new Chart(document.getElementById('chartByWarehouse'), {
+    type:'doughnut',
+    data:{labels:whLabels, datasets:[{data:whData, backgroundColor:['#5b6ef5','#33c98a','#e0a836','#f0666e','#5aa4f0','#a86ef0']}]},
+    options:{responsive:true}
+  });
+
+  destroyChart('chartByCategory');
+  const catLabels = state.categories.map(c=>c.name);
+  const catData = state.categories.map(c=>state.products.filter(p=>p.categoryId===c.id).length);
+  chartInstances.chartByCategory = new Chart(document.getElementById('chartByCategory'), {
+    type:'pie',
+    data:{labels:catLabels, datasets:[{data:catData, backgroundColor:['#5b6ef5','#33c98a','#e0a836','#f0666e','#5aa4f0','#a86ef0']}]},
+    options:{responsive:true}
+  });
+
+  destroyChart('chartPOStatus');
+  const statuses = ['Draft','Pending','Approved','Received','Cancelled'];
+  const poData = statuses.map(s=>state.purchaseOrders.filter(p=>p.status===s).length);
+  chartInstances.chartPOStatus = new Chart(document.getElementById('chartPOStatus'), {
+    type:'bar',
+    data:{labels:statuses, datasets:[{label:'Purchase Orders', data:poData, backgroundColor:'#5b6ef5'}]},
+    options:{plugins:{legend:{display:false}}, responsive:true}
+  });
+}
+function destroyChart(key){ if(chartInstances[key]){ chartInstances[key].destroy(); delete chartInstances[key]; } }
+
+/* =====================================================================
+   AUDIT LOGS
+===================================================================== */
+function renderAuditLogs(){
+  const body = document.getElementById('auditBody');
+  if(!body) return;
+  const q = (document.getElementById('auditSearch')?.value||'').toLowerCase();
+  let rows = state.auditLogs;
+  if(q) rows = rows.filter(a=> a.action.toLowerCase().includes(q) || a.module.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
+  if(rows.length===0){ body.innerHTML='<tr class="empty-row"><td colspan="5">No audit log entries found.</td></tr>'; return; }
+  body.innerHTML = rows.map(a=>
+    '<tr><td>'+a.date+'</td><td>'+escapeHtml(a.user)+'</td><td>'+escapeHtml(a.action)+'</td><td>'+escapeHtml(a.module)+'</td><td>'+escapeHtml(a.description)+'</td></tr>'
+  ).join('');
+}
+
+/* =====================================================================
+   DEMO SEED DATA
+===================================================================== */
+function seedDemoData(){
+  state.categories = [
+    {id:nextId('category'), name:'Computers', description:'Desktops, laptops and workstations', status:'Active'},
+    {id:nextId('category'), name:'Peripherals', description:'Keyboards, mice and accessories', status:'Active'},
+    {id:nextId('category'), name:'Networking', description:'Cables, routers and switches', status:'Active'},
+    {id:nextId('category'), name:'Accessories', description:'General computer accessories', status:'Active'},
+    {id:nextId('category'), name:'Office Equipment', description:'Printers and office devices', status:'Active'}
+  ];
+  state.brands = [
+    {id:nextId('brand'), name:'TechPro', description:'In-house electronics brand', status:'Active'},
+    {id:nextId('brand'), name:'CoreLine', description:'Value peripherals brand', status:'Active'},
+    {id:nextId('brand'), name:'NetGear Plus', description:'Networking equipment brand', status:'Active'}
+  ];
+  state.units = [
+    {id:nextId('unit'), name:'Piece', abbr:'pc', status:'Active'},
+    {id:nextId('unit'), name:'Box', abbr:'box', status:'Active'},
+    {id:nextId('unit'), name:'Kilogram', abbr:'kg', status:'Active'},
+    {id:nextId('unit'), name:'Liter', abbr:'L', status:'Active'},
+    {id:nextId('unit'), name:'Meter', abbr:'m', status:'Active'}
+  ];
+  state.suppliers = [
+    {id:nextId('supplier'), name:'ABC Technology Supplies', contactPerson:'Maria Santos', phone:'555-0101', email:'sales@abctech.example', address:'12 Industrial Ave', status:'Active'},
+    {id:nextId('supplier'), name:'XYZ Office Solutions', contactPerson:'John Reyes', phone:'555-0102', email:'contact@xyzoffice.example', address:'88 Commerce St', status:'Active'},
+    {id:nextId('supplier'), name:'Global Electronics', contactPerson:'Lena Cruz', phone:'555-0103', email:'info@globalelec.example', address:'45 Harbor Rd', status:'Active'}
+  ];
+  state.warehouses = [
+    {id:nextId('warehouse'), name:'Main Warehouse', location:'District 1', manager:'Carlos Dizon', status:'Active'},
+    {id:nextId('warehouse'), name:'Secondary Warehouse', location:'District 5', manager:'Ana Villanueva', status:'Active'}
+  ];
+
+  const c = k=>state.categories.find(x=>x.name===k).id;
+  const b = k=>state.brands.find(x=>x.name===k).id;
+  const u = k=>state.units.find(x=>x.name===k).id;
+  const s = k=>state.suppliers.find(x=>x.name===k).id;
+  const w = k=>state.warehouses.find(x=>x.name===k).id;
+
+  state.products = [
+    {id:nextId('product'), sku:'SKU-1001', barcode:'8901000000011', name:'Laptop', categoryId:c('Computers'), brandId:b('TechPro'), unitId:u('Piece'), supplierId:s('ABC Technology Supplies'), warehouseId:w('Main Warehouse'), cost:520, price:780, stock:18, minStock:5, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1002', barcode:'8901000000028', name:'Desktop Computer', categoryId:c('Computers'), brandId:b('TechPro'), unitId:u('Piece'), supplierId:s('ABC Technology Supplies'), warehouseId:w('Main Warehouse'), cost:410, price:650, stock:3, minStock:5, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1003', barcode:'8901000000035', name:'Wireless Mouse', categoryId:c('Peripherals'), brandId:b('CoreLine'), unitId:u('Piece'), supplierId:s('XYZ Office Solutions'), warehouseId:w('Main Warehouse'), cost:6.5, price:14.99, stock:120, minStock:20, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1004', barcode:'8901000000042', name:'Mechanical Keyboard', categoryId:c('Peripherals'), brandId:b('CoreLine'), unitId:u('Piece'), supplierId:s('XYZ Office Solutions'), warehouseId:w('Main Warehouse'), cost:22, price:49.99, stock:8, minStock:10, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1005', barcode:'8901000000059', name:'Monitor', categoryId:c('Computers'), brandId:b('TechPro'), unitId:u('Piece'), supplierId:s('Global Electronics'), warehouseId:w('Secondary Warehouse'), cost:95, price:159, stock:14, minStock:6, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1006', barcode:'8901000000066', name:'Ethernet Cable', categoryId:c('Networking'), brandId:b('NetGear Plus'), unitId:u('Meter'), supplierId:s('Global Electronics'), warehouseId:w('Secondary Warehouse'), cost:0.4, price:0.99, stock:400, minStock:100, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1007', barcode:'8901000000073', name:'USB Flash Drive', categoryId:c('Accessories'), brandId:b('CoreLine'), unitId:u('Piece'), supplierId:s('XYZ Office Solutions'), warehouseId:w('Main Warehouse'), cost:3.2, price:8.5, stock:60, minStock:15, status:'Active'},
+    {id:nextId('product'), sku:'SKU-1008', barcode:'8901000000080', name:'Printer', categoryId:c('Office Equipment'), brandId:b('TechPro'), unitId:u('Piece'), supplierId:s('ABC Technology Supplies'), warehouseId:w('Secondary Warehouse'), cost:110, price:189, stock:2, minStock:4, status:'Active'}
+  ];
+
+  const p = name=>state.products.find(x=>x.name===name).id;
+
+  // Sample stock movements
+  const moves = [
+    {date:daysAgo(6), reference:'SI-00001', productId:p('Laptop'), type:'Stock In', qty:10, warehouseId:w('Main Warehouse'), user:'admin', remarks:'Initial stock'},
+    {date:daysAgo(5), reference:'SO-00001', productId:p('Wireless Mouse'), type:'Stock Out', qty:20, warehouseId:w('Main Warehouse'), user:'admin', remarks:'Bulk order fulfilled'},
+    {date:daysAgo(4), reference:'TR-00001', productId:p('Monitor'), type:'Transfer Out', qty:5, warehouseId:w('Main Warehouse'), user:'admin', remarks:'Rebalancing stock'},
+    {date:daysAgo(4), reference:'TR-00001', productId:p('Monitor'), type:'Transfer In', qty:5, warehouseId:w('Secondary Warehouse'), user:'admin', remarks:'Rebalancing stock'},
+    {date:daysAgo(3), reference:'SI-00002', productId:p('Mechanical Keyboard'), type:'Stock In', qty:15, warehouseId:w('Main Warehouse'), user:'admin', remarks:'Restock'},
+    {date:daysAgo(2), reference:'GR-00001', productId:p('Printer'), type:'Goods Received', qty:6, warehouseId:w('Secondary Warehouse'), user:'admin', remarks:'PO fulfillment'},
+    {date:daysAgo(1), reference:'SO-00002', productId:p('Desktop Computer'), type:'Stock Out', qty:4, warehouseId:w('Main Warehouse'), user:'admin', remarks:'Corporate order'}
+  ];
+  moves.forEach(m=>state.stockMovements.push({...m, id: state.stockMovements.length+1}));
+  state.stockMovements.reverse();
+  for(let i=0;i<7;i++) nextId('movement');
+
+  // Sample transfer record
+  state.transfers.push({id:1, transferNumber:'TR-00001', date:daysAgo(4), productId:p('Monitor'), fromWarehouseId:w('Main Warehouse'), toWarehouseId:w('Secondary Warehouse'), qty:5, remarks:'Rebalancing stock'});
+  nextId('transfer');
+
+  // Sample purchase orders
+  const po1Items = [{productId:p('Printer'), qty:6, unitCost:100, total:600}];
+  state.purchaseOrders.push({id:nextId('po'), poNumber:'PO-00001', supplierId:s('ABC Technology Supplies'), date:daysAgo(9), expectedDate:daysAgo(2), status:'Received', items:po1Items, subtotal:600, total:600});
+  const po2Items = [{productId:p('Desktop Computer'), qty:10, unitCost:400, total:4000},{productId:p('Mechanical Keyboard'), qty:20, unitCost:20, total:400}];
+  state.purchaseOrders.push({id:nextId('po'), poNumber:'PO-00002', supplierId:s('XYZ Office Solutions'), date:daysAgo(3), expectedDate:daysAgo(-2), status:'Approved', items:po2Items, subtotal:4400, total:4400});
+  const po3Items = [{productId:p('Ethernet Cable'), qty:500, unitCost:0.35, total:175}];
+  state.purchaseOrders.push({id:nextId('po'), poNumber:'PO-00003', supplierId:s('Global Electronics'), date:daysAgo(1), expectedDate:daysAgo(-5), status:'Pending', items:po3Items, subtotal:175, total:175});
+
+  // Sample goods receipt matching PO-00001
+  state.goodsReceipts.push({id:nextId('receipt'), receivingNumber:'GR-00001', poId:findById(state.purchaseOrders,1).id, supplierId:s('ABC Technology Supplies'), warehouseId:w('Secondary Warehouse'), date:daysAgo(2), items:[{productId:p('Printer'), orderedQty:6, receivedQty:6}], remarks:'Complete delivery'});
+
+  // Sample audit logs
+  const auditSeed = [
+    {date:daysAgo(9), user:'admin', action:'Purchase Order', module:'Purchase Orders', description:'Created PO PO-00001'},
+    {date:daysAgo(6), user:'admin', action:'Stock In', module:'Inventory', description:'Stock in of 10 units for Laptop'},
+    {date:daysAgo(5), user:'admin', action:'Stock Out', module:'Inventory', description:'Stock out of 20 units for Wireless Mouse'},
+    {date:daysAgo(4), user:'admin', action:'Transfer', module:'Stock Transfers', description:'Transferred 5 units of Monitor from Main Warehouse to Secondary Warehouse'},
+    {date:daysAgo(3), user:'admin', action:'Purchase Order', module:'Purchase Orders', description:'Created PO PO-00002'},
+    {date:daysAgo(2), user:'admin', action:'Goods Receiving', module:'Goods Receiving', description:'Received goods for PO PO-00001'},
+    {date:daysAgo(1), user:'admin', action:'Purchase Order', module:'Purchase Orders', description:'Created PO PO-00003'},
+    {date:daysAgo(1), user:'admin', action:'Stock Out', module:'Inventory', description:'Stock out of 4 units for Desktop Computer'}
+  ];
+  auditSeed.forEach(a=>state.auditLogs.push(a));
+  state.auditLogs.reverse();
+
+  // Sample notifications
+  state.notifications = [
+    {id:nextId('notification'), date:daysAgo(2), message:'Goods received for PO PO-00001', type:'success', read:true},
+    {id:nextId('notification'), date:daysAgo(3), message:'Low stock: Desktop Computer is below minimum level', type:'warning', read:true},
+    {id:nextId('notification'), date:daysAgo(1), message:'Purchase order created: PO-00003', type:'info', read:false}
+  ];
+}
+function daysAgo(n){
+  const d = new Date();
+  d.setDate(d.getDate()-n);
+  return d.toISOString().slice(0,10);
+}
+</script>
+</body>
+</html>
