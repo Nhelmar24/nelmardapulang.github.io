@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N24 Appointment Scheduler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary:#2563EB; --primary-dark:#1D4ED8; --primary-light:#DBEAFE;
+    --success:#22C55E; --success-light:#DCFCE7;
+    --warning:#F59E0B; --warning-light:#FEF3C7;
+    --danger:#EF4444; --danger-light:#FEE2E2;
+    --bg:#F8FAFC; --card:#FFFFFF; --text:#0F172A; --text-mute:#64748B;
+    --border:#E2E8F0; --border-soft:#EDF2F7;
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px -8px rgba(15,23,42,.08);
+    --shadow-lg:0 20px 44px -12px rgba(15,23,42,.18);
+    --radius:16px; --radius-sm:10px;
+    --font-display:'Manrope',sans-serif; --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  }
+  [data-theme="dark"]{
+    --bg:#0F172A; --card:#1E293B; --text:#F1F5F9; --text-mute:#94A3B8;
+    --border:#334155; --border-soft:#27344A;
+    --primary-light:#1E3A6E;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -8px rgba(0,0,0,.5);
+    --shadow-lg:0 24px 48px -12px rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:var(--font-body); background:var(--bg); color:var(--text);
+    transition:background .35s ease,color .35s ease; min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:var(--font-display); margin:0;}
+  button{font-family:inherit; cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  a{color:inherit;}
+  ::selection{background:var(--primary); color:#fff;}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  :focus-visible{outline:2px solid var(--primary); outline-offset:2px; border-radius:4px;}
+
+  /* ===== Login Screen ===== */
+  #login-screen{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 15% 20%, var(--primary-light) 0%, transparent 45%),
+      var(--bg);
+    padding:24px;
+  }
+  .login-card{
+    width:100%; max-width:400px; background:var(--card); border:1px solid var(--border-soft);
+    border-radius:20px; padding:40px 36px; box-shadow:var(--shadow-lg);
+    animation:riseIn .5s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes riseIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  .login-logo{
+    width:52px; height:52px; border-radius:14px; background:linear-gradient(135deg,var(--primary),#60A5FA);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display);
+    font-weight:800; font-size:19px; margin-bottom:20px; box-shadow:0 8px 20px -6px rgba(37,99,235,.5);
+  }
+  .login-card h1{font-size:22px; font-weight:800; letter-spacing:-.02em;}
+  .login-card p.sub{color:var(--text-mute); margin:6px 0 28px; font-size:14.5px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-mute);}
+  .field input, .field select, .field textarea{
+    width:100%; padding:11px 13px; border-radius:var(--radius-sm); border:1.5px solid var(--border);
+    background:var(--bg); color:var(--text); font-size:14.5px; transition:border-color .2s, box-shadow .2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-light); outline:none;
+  }
+  .btn{
+    border:none; border-radius:var(--radius-sm); padding:11px 18px; font-weight:700; font-size:14.5px;
+    transition:transform .15s, box-shadow .2s, background .2s; display:inline-flex; align-items:center; gap:7px;
+    justify-content:center;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--primary); color:#fff; box-shadow:0 6px 16px -6px rgba(37,99,235,.55);}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-full{width:100%;}
+  .btn-ghost{background:transparent; color:var(--text-mute); border:1.5px solid var(--border);}
+  .btn-ghost:hover{border-color:var(--text-mute); color:var(--text);}
+  .btn-danger-outline{background:transparent; color:var(--danger); border:1.5px solid var(--danger-light);}
+  .btn-danger-outline:hover{background:var(--danger-light);}
+  .btn-sm{padding:6px 11px; font-size:12.5px; border-radius:8px;}
+  .btn-icon{padding:8px; border-radius:9px;}
+  .login-hint{margin-top:18px; font-size:12.5px; color:var(--text-mute); text-align:center;}
+
+  /* ===== App Shell ===== */
+  #app{display:none; min-height:100vh; flex-direction:column;}
+  header.topbar{
+    position:sticky; top:0; z-index:40; display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px; background:color-mix(in srgb, var(--card) 88%, transparent);
+    backdrop-filter:blur(10px); border-bottom:1px solid var(--border-soft);
+  }
+  .brand{display:flex; align-items:center; gap:11px;}
+  .brand .mark{
+    width:38px; height:38px; border-radius:11px; background:linear-gradient(135deg,var(--primary),#60A5FA);
+    display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display);
+    font-weight:800; font-size:15px; flex-shrink:0;
+  }
+  .brand .name{font-weight:800; font-size:16.5px; letter-spacing:-.01em;}
+  .brand .tag{font-size:11.5px; color:var(--text-mute); font-weight:500;}
+  .topbar-actions{display:flex; align-items:center; gap:10px;}
+
+  .theme-switch{
+    display:flex; align-items:center; gap:8px; border:1.5px solid var(--border); border-radius:999px;
+    padding:4px; background:var(--bg);
+  }
+  .theme-switch button{
+    border:none; background:transparent; border-radius:999px; width:32px; height:32px; display:flex;
+    align-items:center; justify-content:center; color:var(--text-mute); transition:background .2s,color .2s;
+  }
+  .theme-switch button.active{background:var(--primary); color:#fff;}
+
+  main.content{padding:26px 28px 60px; max-width:1360px; margin:0 auto; width:100%;}
+
+  /* ===== Stats ===== */
+  .stats-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px;}
+  .stat-card{
+    background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius); padding:18px 20px;
+    box-shadow:var(--shadow); position:relative; overflow:hidden;
+  }
+  .stat-card .icon{
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    margin-bottom:14px; font-size:17px;
+  }
+  .stat-card .value{font-family:var(--font-display); font-size:28px; font-weight:800; letter-spacing:-.02em;}
+  .stat-card .label{font-size:13px; color:var(--text-mute); font-weight:600; margin-top:2px;}
+  .pulse-dot{
+    width:7px; height:7px; border-radius:50%; background:var(--success); display:inline-block; margin-right:6px;
+    box-shadow:0 0 0 0 rgba(34,197,94,.6); animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(34,197,94,.55);}
+    70%{box-shadow:0 0 0 8px rgba(34,197,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+  }
+
+  /* ===== Layout Grid ===== */
+  .main-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:18px; margin-bottom:22px; align-items:start;}
+  .panel{
+    background:var(--card); border:1px solid var(--border-soft); border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:20px 22px;
+  }
+  .panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .panel-head h2{font-size:16px; font-weight:800; letter-spacing:-.01em;}
+  .panel-head .muted{font-size:12.5px; color:var(--text-mute); font-weight:500;}
+
+  /* Calendar */
+  .cal-nav{display:flex; align-items:center; gap:8px;}
+  .cal-nav button{
+    background:var(--bg); border:1px solid var(--border); border-radius:8px; width:30px; height:30px;
+    display:flex; align-items:center; justify-content:center; color:var(--text); transition:.2s;
+  }
+  .cal-nav button:hover{border-color:var(--primary); color:var(--primary);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center;}
+  .cal-grid .dow{font-size:11px; font-weight:700; color:var(--text-mute); padding:6px 0 10px;}
+  .cal-day{
+    position:relative; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+    border-radius:10px; font-size:13.5px; font-weight:600; cursor:pointer; border:1.5px solid transparent;
+    transition:background .15s, border-color .15s, transform .1s; color:var(--text);
+  }
+  .cal-day:hover{background:var(--primary-light);}
+  .cal-day.muted{color:var(--text-mute); opacity:.4; cursor:default;}
+  .cal-day.muted:hover{background:transparent;}
+  .cal-day.today{border-color:var(--primary);}
+  .cal-day.selected{background:var(--primary); color:#fff;}
+  .cal-day .dot{
+    position:absolute; bottom:4px; width:4px; height:4px; border-radius:50%; background:var(--warning);
+  }
+  .cal-day.selected .dot{background:#fff;}
+  .selected-date-panel{margin-top:16px; padding-top:16px; border-top:1px dashed var(--border);}
+  .selected-date-panel h3{font-size:13.5px; font-weight:700; margin-bottom:10px;}
+  .mini-appt{
+    display:flex; align-items:center; justify-content:space-between; padding:9px 11px; border-radius:9px;
+    background:var(--bg); font-size:13px; margin-bottom:7px; border:1px solid var(--border-soft);
+  }
+  .mini-appt .t{font-family:var(--font-mono); font-weight:600; color:var(--primary); font-size:12px;}
+
+  /* Time slots */
+  .slot-add-row{display:flex; gap:8px; margin-bottom:14px;}
+  .slot-add-row input{flex:1;}
+  .slot-list{display:flex; flex-wrap:wrap; gap:8px;}
+  .slot-chip{
+    display:flex; align-items:center; gap:8px; padding:8px 11px 8px 13px; border-radius:999px;
+    border:1.5px solid var(--border); font-family:var(--font-mono); font-size:12.5px; font-weight:600;
+    background:var(--bg); transition:.2s;
+  }
+  .slot-chip::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--success); flex-shrink:0;}
+  .slot-chip.booked{border-color:var(--danger-light); background:var(--danger-light); color:#B91C1C;}
+  .slot-chip.booked::before{background:var(--danger);}
+  [data-theme="dark"] .slot-chip.booked{color:#FCA5A5;}
+  .slot-chip button{background:none; border:none; color:inherit; opacity:.55; font-size:14px; line-height:1; padding:0 2px;}
+  .slot-chip button:hover{opacity:1;}
+  .slot-chip .toggle-btn{opacity:.75; font-size:11px; text-decoration:underline; font-family:var(--font-body);}
+
+  /* Buttons row */
+  .row-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;}
+
+  /* Table */
+  .table-toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .search-box{position:relative; flex:1; min-width:200px; max-width:320px;}
+  .search-box input{width:100%; padding:9px 12px 9px 34px; border-radius:999px; border:1.5px solid var(--border); background:var(--bg); font-size:13.5px;}
+  .search-box svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); opacity:.5;}
+  .chip-filters{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip-filter{
+    padding:7px 13px; border-radius:999px; border:1.5px solid var(--border); background:var(--bg);
+    font-size:12.5px; font-weight:600; color:var(--text-mute); transition:.2s;
+  }
+  .chip-filter.active{background:var(--primary); border-color:var(--primary); color:#fff;}
+  select#sortSelect{padding:8px 12px; border-radius:999px; border:1.5px solid var(--border); background:var(--bg); font-size:12.5px; font-weight:600;}
+
+  table.booking-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  table.booking-table th{
+    text-align:left; padding:10px 12px; font-size:11px; text-transform:uppercase; letter-spacing:.04em;
+    color:var(--text-mute); border-bottom:1.5px solid var(--border); font-weight:700;
+  }
+  table.booking-table td{padding:12px; border-bottom:1px solid var(--border-soft); vertical-align:middle;}
+  table.booking-table tbody tr{transition:background .15s;}
+  table.booking-table tbody tr:hover{background:var(--bg);}
+  .cust-name{font-weight:700;}
+  .cust-sub{font-size:11.5px; color:var(--text-mute);}
+  .status-badge{
+    padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; display:inline-block;
+  }
+  .status-badge.confirmed{background:var(--success-light); color:#166534;}
+  .status-badge.pending{background:var(--warning-light); color:#92400E;}
+  [data-theme="dark"] .status-badge.confirmed{color:#4ADE80;}
+  [data-theme="dark"] .status-badge.pending{color:#FBBF24;}
+  .table-actions{display:flex; gap:6px;}
+  .icon-btn{
+    width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg);
+    display:inline-flex; align-items:center; justify-content:center; color:var(--text-mute); transition:.15s;
+  }
+  .icon-btn:hover{border-color:var(--primary); color:var(--primary);}
+  .icon-btn.danger:hover{border-color:var(--danger); color:var(--danger);}
+  .empty-state{padding:44px 20px; text-align:center; color:var(--text-mute);}
+  .empty-state .icon{font-size:34px; margin-bottom:10px;}
+  .empty-state p{font-size:13.5px; margin:4px 0 0;}
+
+  /* Modal */
+  .overlay{
+    position:fixed; inset:0; background:rgba(15,23,42,.55); backdrop-filter:blur(2px); z-index:100;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .overlay.open{display:flex; animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;} to{opacity:1;}}
+  .modal{
+    background:var(--card); border-radius:18px; width:100%; max-width:520px; max-height:88vh; overflow-y:auto;
+    box-shadow:var(--shadow-lg); animation:modalIn .28s cubic-bezier(.16,1,.3,1); border:1px solid var(--border-soft);
+  }
+  @keyframes modalIn{from{opacity:0; transform:translateY(18px) scale(.97);} to{opacity:1; transform:translateY(0) scale(1);}}
+  .modal-head{display:flex; align-items:center; justify-content:space-between; padding:18px 22px; border-bottom:1px solid var(--border-soft);}
+  .modal-head h3{font-size:16px; font-weight:800;}
+  .modal-close{background:var(--bg); border:1px solid var(--border); border-radius:8px; width:28px; height:28px; color:var(--text-mute);}
+  .modal-body{padding:20px 22px;}
+  .modal-foot{padding:16px 22px; border-top:1px solid var(--border-soft); display:flex; justify-content:flex-end; gap:10px;}
+  .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .form-grid .full{grid-column:1/-1;}
+  .field-error{color:var(--danger); font-size:11.5px; margin-top:4px; display:none;}
+  .field.invalid input, .field.invalid select{border-color:var(--danger);}
+  .field.invalid .field-error{display:block;}
+
+  .sim-preview{background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px; font-size:13.5px; line-height:1.65;}
+  .sim-preview .meta{color:var(--text-mute); font-size:12px; margin-bottom:2px;}
+  .sim-preview .meta b{color:var(--text); font-weight:600;}
+  .sim-success{display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; background:var(--success-light); color:#166534; font-weight:700; font-size:13px; margin-bottom:14px;}
+  [data-theme="dark"] .sim-success{color:#4ADE80;}
+
+  /* Toasts */
+  #toast-wrap{position:fixed; bottom:22px; right:22px; z-index:200; display:flex; flex-direction:column; gap:10px; max-width:320px;}
+  .toast{
+    background:var(--card); border:1px solid var(--border-soft); border-left:4px solid var(--primary);
+    border-radius:10px; padding:12px 16px; box-shadow:var(--shadow-lg); font-size:13.5px; font-weight:600;
+    animation:toastIn .3s cubic-bezier(.16,1,.3,1); display:flex; align-items:center; gap:9px;
+  }
+  .toast.success{border-left-color:var(--success);}
+  .toast.error{border-left-color:var(--danger);}
+  @keyframes toastIn{from{opacity:0; transform:translateX(24px);} to{opacity:1; transform:translateX(0);}}
+  .toast.out{animation:toastOut .25s ease forwards;}
+  @keyframes toastOut{to{opacity:0; transform:translateX(24px);}}
+
+  .skel{background:linear-gradient(90deg,var(--border-soft) 25%,var(--border) 37%,var(--border-soft) 63%); background-size:400% 100%; animation:skel 1.3s ease infinite; border-radius:8px;}
+  @keyframes skel{0%{background-position:100% 0;} 100%{background-position:0 0;}}
+
+  @media (max-width:980px){
+    .stats-grid{grid-template-columns:repeat(2,1fr);}
+    .main-grid{grid-template-columns:1fr;}
+    .form-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    header.topbar{padding:12px 16px;}
+    main.content{padding:18px 14px 50px;}
+    .stats-grid{grid-template-columns:1fr 1fr; gap:10px;}
+    .brand .tag{display:none;}
+    table.booking-table{font-size:12.5px;}
+    table.booking-table th:nth-child(5), table.booking-table td:nth-child(5){display:none;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important; transition-duration:.001s !important;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="login-screen">
+  <form class="login-card" id="loginForm" aria-labelledby="loginTitle">
+    <div class="login-logo" aria-hidden="true">N24</div>
+    <h1 id="loginTitle">Welcome to N24 Scheduler</h1>
+    <p class="sub">Sign in to manage today's appointments.</p>
+    <div class="field">
+      <label for="loginUser">Username</label>
+      <input type="text" id="loginUser" autocomplete="username" placeholder="e.g. jane.doe" required>
+    </div>
+    <div class="field">
+      <label for="loginPass">Password</label>
+      <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••" required>
+    </div>
+    <button type="submit" class="btn btn-primary btn-full">Log in</button>
+    <p class="login-hint">Demo login — any username &amp; password works. Nothing is stored after you log out.</p>
+  </form>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark" aria-hidden="true">N24</div>
+      <div>
+        <div class="name">N24 Appointment Scheduler</div>
+        <div class="tag">Session-only workspace</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="theme-switch" role="group" aria-label="Theme toggle">
+        <button id="lightBtn" aria-label="Light mode" title="Light mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <button id="darkBtn" aria-label="Dark mode" title="Dark mode">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+        </button>
+      </div>
+      <button class="btn btn-danger-outline btn-sm" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <!-- Stats -->
+    <section class="stats-grid" aria-label="Dashboard statistics">
+      <div class="stat-card">
+        <div class="icon" style="background:var(--primary-light); color:var(--primary);">📅</div>
+        <div class="value"><span class="pulse-dot" aria-hidden="true"></span><span id="statToday">0</span></div>
+        <div class="label">Today's Appointments</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background:var(--warning-light); color:#B45309;">⏳</div>
+        <div class="value" id="statUpcoming">0</div>
+        <div class="label">Upcoming Appointments</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background:var(--success-light); color:#15803D;">📖</div>
+        <div class="value" id="statTotal">0</div>
+        <div class="label">Total Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="background:var(--danger-light); color:#B91C1C;">🕐</div>
+        <div class="value" id="statSlots">0</div>
+        <div class="label">Available Time Slots</div>
+      </div>
+    </section>
+
+    <!-- Calendar + Time slots -->
+    <section class="main-grid">
+      <div class="panel" aria-label="Calendar">
+        <div class="panel-head">
+          <h2 id="calMonthLabel">Month</h2>
+          <div class="cal-nav">
+            <button id="prevMonth" aria-label="Previous month">‹</button>
+            <button id="nextMonth" aria-label="Next month">›</button>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid" role="grid"></div>
+        <div class="selected-date-panel">
+          <h3 id="selectedDateLabel">Select a date</h3>
+          <div id="selectedDateAppts"></div>
+        </div>
+        <div class="row-actions">
+          <button class="btn btn-primary" id="openBookingBtn">+ New Appointment</button>
+        </div>
+      </div>
+
+      <div class="panel" aria-label="Time slot management">
+        <div class="panel-head">
+          <h2>Time Slots</h2>
+          <span class="muted" id="slotCountLabel"></span>
+        </div>
+        <div class="slot-add-row">
+          <input type="time" id="newSlotInput" aria-label="New time slot">
+          <button class="btn btn-primary btn-sm" id="addSlotBtn">Add slot</button>
+        </div>
+        <div class="slot-list" id="slotList"></div>
+      </div>
+    </section>
+
+    <!-- Booking history -->
+    <section class="panel" aria-label="Booking history">
+      <div class="panel-head">
+        <h2>Booking History</h2>
+      </div>
+      <div class="table-toolbar">
+        <div class="search-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" id="searchInput" placeholder="Search customer, service, phone…" aria-label="Search bookings">
+        </div>
+        <div class="chip-filters" id="dateFilters" role="group" aria-label="Filter by date">
+          <button class="chip-filter active" data-filter="all">All</button>
+          <button class="chip-filter" data-filter="today">Today</button>
+          <button class="chip-filter" data-filter="week">This Week</button>
+          <button class="chip-filter" data-filter="month">This Month</button>
+        </div>
+        <select id="sortSelect" aria-label="Sort bookings">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Customer name (A–Z)</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="booking-table" id="bookingTable">
+          <thead>
+            <tr>
+              <th>Customer</th><th>Service</th><th>Date</th><th>Time</th><th>Phone / Email</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="bookingTbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="tableEmptyState" style="display:none;">
+        <div class="icon">🗓️</div>
+        <strong>No bookings found</strong>
+        <p>Try a different search or filter, or create a new appointment.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ Booking Modal ============ -->
+<div class="overlay" id="bookingOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
+    <div class="modal-head">
+      <h3 id="bookingModalTitle">New Appointment</h3>
+      <button class="modal-close" id="closeBookingModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="bookingForm" novalidate>
+        <input type="hidden" id="bookingId">
+        <div class="form-grid">
+          <div class="field full">
+            <label for="custName">Customer Name *</label>
+            <input type="text" id="custName" required>
+            <div class="field-error">Please enter the customer's name.</div>
+          </div>
+          <div class="field">
+            <label for="custPhone">Phone Number *</label>
+            <input type="tel" id="custPhone" required placeholder="09xx xxx xxxx">
+            <div class="field-error">Please enter a phone number.</div>
+          </div>
+          <div class="field">
+            <label for="custEmail">Email *</label>
+            <input type="email" id="custEmail" required placeholder="name@email.com">
+            <div class="field-error">Please enter a valid email.</div>
+          </div>
+          <div class="field full">
+            <label for="serviceType">Service Type *</label>
+            <select id="serviceType" required></select>
+          </div>
+          <div class="field">
+            <label for="apptDate">Appointment Date *</label>
+            <input type="date" id="apptDate" required>
+            <div class="field-error">Please choose a date.</div>
+          </div>
+          <div class="field">
+            <label for="timeSlotSelect">Time Slot *</label>
+            <select id="timeSlotSelect" required></select>
+            <div class="field-error">This slot is booked — choose another.</div>
+          </div>
+          <div class="field full">
+            <label for="apptNotes">Notes</label>
+            <textarea id="apptNotes" rows="3" placeholder="Optional notes…"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="cancelBookingBtn">Cancel</button>
+      <button class="btn btn-primary" id="saveBookingBtn">Save Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ View Modal ============ -->
+<div class="overlay" id="viewOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle" style="max-width:440px;">
+    <div class="modal-head">
+      <h3 id="viewModalTitle">Appointment Details</h3>
+      <button class="modal-close" id="closeViewModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="smsFromViewBtn">Send SMS</button>
+      <button class="btn btn-primary" id="emailFromViewBtn">Send Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Email Simulation Modal ============ -->
+<div class="overlay" id="emailOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="emailModalTitle" style="max-width:460px;">
+    <div class="modal-head">
+      <h3 id="emailModalTitle">Email Reminder</h3>
+      <button class="modal-close" id="closeEmailModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sim-success">✓ Email reminder sent (simulated)</div>
+      <div class="sim-preview" id="emailPreviewBody"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="closeEmailModalBtn2">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SMS Simulation Modal ============ -->
+<div class="overlay" id="smsOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="smsModalTitle" style="max-width:400px;">
+    <div class="modal-head">
+      <h3 id="smsModalTitle">SMS Preview</h3>
+      <button class="modal-close" id="closeSmsModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sim-success">✓ SMS reminder sent (simulated)</div>
+      <div class="sim-preview" id="smsPreviewBody"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" id="closeSmsModalBtn2">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Confirm Delete Modal ============ -->
+<div class="overlay" id="confirmOverlay">
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" style="max-width:380px;">
+    <div class="modal-head">
+      <h3 id="confirmTitle">Delete Appointment?</h3>
+      <button class="modal-close" id="closeConfirmModal" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px; color:var(--text-mute); margin:0;">This will permanently remove <strong id="confirmName"></strong>'s appointment from this session. This can't be undone.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="cancelConfirmBtn">Cancel</button>
+      <button class="btn" style="background:var(--danger); color:#fff;" id="confirmDeleteBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-wrap" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ============================================================
+     STATE  — everything lives only in memory for this page life.
+     No localStorage / sessionStorage / IndexedDB is used anywhere.
+  ============================================================ */
+  const State = {
+    theme: 'light',
+    loggedIn: false,
+    customers: [],
+    services: ['Medical Consultation','Haircut','Hair Coloring','Aircon Cleaning','Aircon Installation','Business Consultation','Follow-up Appointment'],
+    timeSlots: [],      // {id, time, booked}
+    appointments: [],   // {id, name, phone, email, service, date, time, notes, status, createdAt}
+    selectedDate: null, // 'YYYY-MM-DD'
+    calMonth: new Date().getMonth(),
+    calYear: new Date().getFullYear(),
+    filter: 'all',
+    sort: 'newest',
+    search: '',
+    editingId: null,
+    viewingId: null,
+    deletingId: null
+  };
+
+  let uid = 1;
+  const nextId = () => uid++;
+
+  /* ---------- helpers ---------- */
+  const $ = sel => document.querySelector(sel);
+  const $$ = sel => Array.from(document.querySelectorAll(sel));
+  const pad = n => String(n).padStart(2,'0');
+  const toISO = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const todayISO = toISO(new Date());
+
+  function to12h(t){ // "HH:MM" -> "hh:MM AM/PM"
+    if(!t) return '';
+    let [h,m] = t.split(':').map(Number);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12; if(h===0) h=12;
+    return `${pad(h)}:${pad(m)} ${ampm}`;
+  }
+  function fmtDateLong(iso){
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(undefined,{weekday:'short', month:'short', day:'numeric', year:'numeric'});
+  }
+
+  function toast(msg, type='default'){
+    const wrap = $('#toast-wrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    const icon = type==='success' ? '✓' : type==='error' ? '⚠' : 'ℹ';
+    el.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    wrap.appendChild(el);
+    setTimeout(()=>{ el.classList.add('out'); setTimeout(()=>el.remove(),260); }, 3200);
+  }
+
+  /* ============================================================
+     SAMPLE DATA — generated fresh every login
+  ============================================================ */
+  function generateSampleData(){
+    uid = 1;
+    State.customers = [
+      {name:'Maria Santos', phone:'0917 234 5678', email:'maria.santos@email.com'},
+      {name:'John Reyes', phone:'0928 111 2233', email:'john.reyes@email.com'},
+      {name:'Andrea Cruz', phone:'0908 555 4471', email:'andrea.cruz@email.com'},
+      {name:'Michael Tan', phone:'0977 302 9981', email:'michael.tan@email.com'}
+    ];
+    State.timeSlots = [
+      {id:nextId(), time:'09:00', booked:true},
+      {id:nextId(), time:'09:30', booked:false},
+      {id:nextId(), time:'10:00', booked:true},
+      {id:nextId(), time:'10:30', booked:false},
+      {id:nextId(), time:'11:00', booked:false},
+      {id:nextId(), time:'13:00', booked:false},
+      {id:nextId(), time:'13:30', booked:true},
+      {id:nextId(), time:'14:00', booked:false},
+      {id:nextId(), time:'14:30', booked:false}
+    ];
+    const d = new Date();
+    const mk = (offset) => toISO(new Date(d.getFullYear(), d.getMonth(), d.getDate()+offset));
+    State.appointments = [
+      {id:nextId(), name:'Maria Santos', phone:'0917 234 5678', email:'maria.santos@email.com', service:'Medical Consultation', date:mk(0), time:'09:00', notes:'First visit', status:'confirmed', createdAt:Date.now()-500000},
+      {id:nextId(), name:'John Reyes', phone:'0928 111 2233', email:'john.reyes@email.com', service:'Aircon Cleaning', date:mk(0), time:'13:30', notes:'', status:'confirmed', createdAt:Date.now()-400000},
+      {id:nextId(), name:'Andrea Cruz', phone:'0908 555 4471', email:'andrea.cruz@email.com', service:'Haircut', date:mk(1), time:'10:00', notes:'Requested Stylist B', status:'pending', createdAt:Date.now()-300000},
+      {id:nextId(), name:'Michael Tan', phone:'0977 302 9981', email:'michael.tan@email.com', service:'Business Consultation', date:mk(3), time:'14:00', notes:'', status:'confirmed', createdAt:Date.now()-200000},
+      {id:nextId(), name:'Maria Santos', phone:'0917 234 5678', email:'maria.santos@email.com', service:'Follow-up Appointment', date:mk(7), time:'11:00', notes:'Bring previous results', status:'pending', createdAt:Date.now()-100000}
+    ];
+    State.selectedDate = todayISO;
+  }
+
+  /* ============================================================
+     LOGIN / LOGOUT
+  ============================================================ */
+  $('#loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Signing in…';
+    setTimeout(()=>{
+      State.loggedIn = true;
+      generateSampleData();
+      $('#login-screen').style.display = 'none';
+      $('#app').style.display = 'flex';
+      renderAll();
+      btn.disabled = false;
+      btn.innerHTML = original;
+      toast('Welcome back! Sample data loaded for this session.', 'success');
+    }, 500);
+  });
+
+  $('#logoutBtn').addEventListener('click', function(){
+    // Wipe all in-memory data on logout, per spec.
+    State.loggedIn = false;
+    State.customers = [];
+    State.timeSlots = [];
+    State.appointments = [];
+    State.selectedDate = null;
+    State.editingId = null;
+    State.search = '';
+    State.filter = 'all';
+    State.sort = 'newest';
+    $('#searchInput').value = '';
+    $('#app').style.display = 'none';
+    $('#login-screen').style.display = 'flex';
+    $('#loginForm').reset();
+  });
+
+  /* ============================================================
+     THEME (session memory only)
+  ============================================================ */
+  function applyTheme(){
+    document.documentElement.setAttribute('data-theme', State.theme === 'dark' ? 'dark' : 'light');
+    $('#lightBtn').classList.toggle('active', State.theme==='light');
+    $('#darkBtn').classList.toggle('active', State.theme==='dark');
+  }
+  $('#lightBtn').addEventListener('click', ()=>{ State.theme='light'; applyTheme(); });
+  $('#darkBtn').addEventListener('click', ()=>{ State.theme='dark'; applyTheme(); });
+  applyTheme();
+
+  /* ============================================================
+     CALENDAR
+  ============================================================ */
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  function renderCalendar(){
+    const y = State.calYear, m = State.calMonth;
+    $('#calMonthLabel').textContent = `${monthNames[m]} ${y}`;
+    const grid = $('#calGrid');
+    grid.innerHTML = '';
+    ['S','M','T','W','T','F','S'].forEach(d=>{
+      const el = document.createElement('div');
+      el.className = 'dow'; el.textContent = d;
+      grid.appendChild(el);
+    });
+    const firstDay = new Date(y,m,1).getDay();
+    const daysInMonth = new Date(y,m+1,0).getDate();
+    const prevDays = new Date(y,m,0).getDate();
+
+    const apptDates = new Set(State.appointments.map(a=>a.date));
+
+    for(let i=firstDay-1;i>=0;i--){
+      grid.appendChild(dayCell(prevDays-i, true, null));
+    }
+    for(let d=1; d<=daysInMonth; d++){
+      const iso = `${y}-${pad(m+1)}-${pad(d)}`;
+      grid.appendChild(dayCell(d, false, iso, apptDates.has(iso)));
+    }
+    const totalCells = firstDay + daysInMonth;
+    const trailing = (7 - (totalCells % 7)) % 7;
+    for(let d=1; d<=trailing; d++){
+      grid.appendChild(dayCell(d, true, null));
+    }
+  }
+
+  function dayCell(num, muted, iso, hasAppt){
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (muted?' muted':'');
+    el.textContent = num;
+    el.setAttribute('role','gridcell');
+    if(!muted){
+      el.tabIndex = 0;
+      el.setAttribute('aria-label', iso);
+      if(iso === todayISO) el.classList.add('today');
+      if(iso === State.selectedDate) el.classList.add('selected');
+      if(hasAppt){
+        const dot = document.createElement('span');
+        dot.className = 'dot';
+        el.appendChild(dot);
+      }
+      const select = ()=>{ State.selectedDate = iso; renderCalendar(); renderSelectedDatePanel(); };
+      el.addEventListener('click', select);
+      el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); select(); } });
+    }
+    return el;
+  }
+
+  $('#prevMonth').addEventListener('click', ()=>{
+    State.calMonth--; if(State.calMonth<0){State.calMonth=11; State.calYear--;}
+    renderCalendar();
+  });
+  $('#nextMonth').addEventListener('click', ()=>{
+    State.calMonth++; if(State.calMonth>11){State.calMonth=0; State.calYear++;}
+    renderCalendar();
+  });
+
+  function renderSelectedDatePanel(){
+    const label = $('#selectedDateLabel');
+    const wrap = $('#selectedDateAppts');
+    if(!State.selectedDate){
+      label.textContent = 'Select a date';
+      wrap.innerHTML = '';
+      return;
+    }
+    label.textContent = fmtDateLong(State.selectedDate);
+    const dayAppts = State.appointments
+      .filter(a=>a.date===State.selectedDate)
+      .sort((a,b)=>a.time.localeCompare(b.time));
+    if(dayAppts.length===0){
+      wrap.innerHTML = `<p style="font-size:12.5px; color:var(--text-mute); margin:0;">No appointments on this date.</p>`;
+      return;
+    }
+    wrap.innerHTML = dayAppts.map(a=>`
+      <div class="mini-appt">
+        <span>${escapeHtml(a.name)} — ${escapeHtml(a.service)}</span>
+        <span class="t">${to12h(a.time)}</span>
+      </div>
+    `).join('');
+  }
+
+  /* ============================================================
+     TIME SLOTS
+  ============================================================ */
+  function renderSlots(){
+    const list = $('#slotList');
+    const sorted = [...State.timeSlots].sort((a,b)=>a.time.localeCompare(b.time));
+    $('#slotCountLabel').textContent = `${sorted.filter(s=>!s.booked).length} available`;
+    if(sorted.length===0){
+      list.innerHTML = `<div class="empty-state" style="padding:20px 0;"><div class="icon">🕐</div><p>No time slots yet — add one above.</p></div>`;
+      return;
+    }
+    list.innerHTML = sorted.map(s=>`
+      <span class="slot-chip ${s.booked?'booked':''}" data-id="${s.id}">
+        ${to12h(s.time)}
+        <button class="toggle-btn" data-toggle="${s.id}" aria-label="Toggle booked status">${s.booked?'booked':'available'}</button>
+        <button data-remove="${s.id}" aria-label="Remove slot">✕</button>
+      </span>
+    `).join('');
+  }
+
+  $('#addSlotBtn').addEventListener('click', ()=>{
+    const input = $('#newSlotInput');
+    if(!input.value){ toast('Pick a time first.', 'error'); return; }
+    if(State.timeSlots.some(s=>s.time===input.value)){
+      toast('That time slot already exists.', 'error'); return;
+    }
+    State.timeSlots.push({id:nextId(), time:input.value, booked:false});
+    input.value='';
+    renderSlots(); renderStats(); populateTimeSlotSelect();
+    toast('Time slot added.', 'success');
+  });
+
+  $('#slotList').addEventListener('click', e=>{
+    const toggleId = e.target.getAttribute('data-toggle');
+    const removeId = e.target.getAttribute('data-remove');
+    if(toggleId){
+      const slot = State.timeSlots.find(s=>s.id==toggleId);
+      if(slot){ slot.booked = !slot.booked; renderSlots(); renderStats(); populateTimeSlotSelect(); }
+    }
+    if(removeId){
+      State.timeSlots = State.timeSlots.filter(s=>s.id!=removeId);
+      renderSlots(); renderStats(); populateTimeSlotSelect();
+      toast('Time slot removed.');
+    }
+  });
+
+  /* ============================================================
+     STATS
+  ============================================================ */
+  function renderStats(){
+    const today = State.appointments.filter(a=>a.date===todayISO).length;
+    const upcoming = State.appointments.filter(a=>a.date>todayISO).length;
+    const total = State.appointments.length;
+    const avail = State.timeSlots.filter(s=>!s.booked).length;
+    $('#statToday').textContent = today;
+    $('#statUpcoming').textContent = upcoming;
+    $('#statTotal').textContent = total;
+    $('#statSlots').textContent = avail;
+  }
+
+  /* ============================================================
+     BOOKING FORM (modal)
+  ============================================================ */
+  function populateServiceSelect(){
+    $('#serviceType').innerHTML = State.services.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+  }
+  function populateTimeSlotSelect(){
+    const sel = $('#timeSlotSelect');
+    const sorted = [...State.timeSlots].sort((a,b)=>a.time.localeCompare(b.time));
+    if(sorted.length===0){
+      sel.innerHTML = `<option value="">No slots available — add one first</option>`;
+      return;
+    }
+    sel.innerHTML = sorted.map(s=>`<option value="${s.time}" ${s.booked?'data-booked="1"':''}>${to12h(s.time)} ${s.booked?'(booked)':''}</option>`).join('');
+  }
+
+  function openBookingModal(prefillDate){
+    State.editingId = null;
+    $('#bookingModalTitle').textContent = 'New Appointment';
+    $('#bookingForm').reset();
+    $('#bookingId').value = '';
+    populateServiceSelect();
+    populateTimeSlotSelect();
+    $('#apptDate').value = prefillDate || State.selectedDate || todayISO;
+    clearFormErrors();
+    $('#bookingOverlay').classList.add('open');
+    setTimeout(()=>$('#custName').focus(), 50);
+  }
+  function openEditModal(id){
+    const appt = State.appointments.find(a=>a.id===id);
+    if(!appt) return;
+    State.editingId = id;
+    $('#bookingModalTitle').textContent = 'Edit Appointment';
+    populateServiceSelect();
+    populateTimeSlotSelect();
+    $('#bookingId').value = appt.id;
+    $('#custName').value = appt.name;
+    $('#custPhone').value = appt.phone;
+    $('#custEmail').value = appt.email;
+    $('#serviceType').value = appt.service;
+    $('#apptDate').value = appt.date;
+    // ensure current slot is selectable even if marked booked elsewhere
+    const timeSel = $('#timeSlotSelect');
+    if(![...timeSel.options].some(o=>o.value===appt.time)){
+      const opt = document.createElement('option');
+      opt.value = appt.time; opt.textContent = to12h(appt.time);
+      timeSel.appendChild(opt);
+    }
+    timeSel.value = appt.time;
+    $('#apptNotes').value = appt.notes || '';
+    clearFormErrors();
+    $('#bookingOverlay').classList.add('open');
+  }
+  function closeBookingModal(){
+    $('#bookingOverlay').classList.remove('open');
+    State.editingId = null;
+  }
+  $('#openBookingBtn').addEventListener('click', ()=>openBookingModal());
+  $('#closeBookingModal').addEventListener('click', closeBookingModal);
+  $('#cancelBookingBtn').addEventListener('click', closeBookingModal);
+  $('#bookingOverlay').addEventListener('click', e=>{ if(e.target.id==='bookingOverlay') closeBookingModal(); });
+
+  function clearFormErrors(){
+    $$('#bookingForm .field').forEach(f=>f.classList.remove('invalid'));
+  }
+
+  function validateBooking(){
+    clearFormErrors();
+    let valid = true;
+    const name = $('#custName').value.trim();
+    const phone = $('#custPhone').value.trim();
+    const email = $('#custEmail').value.trim();
+    const date = $('#apptDate').value;
+    const time = $('#timeSlotSelect').value;
+
+    if(!name){ markInvalid('#custName'); valid=false; }
+    if(!phone){ markInvalid('#custPhone'); valid=false; }
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if(!emailOk){ markInvalid('#custEmail'); valid=false; }
+    if(!date){ markInvalid('#apptDate'); valid=false; }
+    if(!time){ valid=false; }
+
+    // Prevent double-booking: same date+time already taken by another appointment
+    if(date && time){
+      const clash = State.appointments.some(a=>a.date===date && a.time===time && a.id!==State.editingId);
+      if(clash){ markInvalid('#timeSlotSelect'); valid=false; }
+    }
+    return valid;
+  }
+  function markInvalid(sel){ $(sel).closest('.field').classList.add('invalid'); }
+
+  $('#saveBookingBtn').addEventListener('click', ()=>{
+    if(!validateBooking()){ toast('Please fix the highlighted fields.', 'error'); return; }
+    const data = {
+      name: $('#custName').value.trim(),
+      phone: $('#custPhone').value.trim(),
+      email: $('#custEmail').value.trim(),
+      service: $('#serviceType').value,
+      date: $('#apptDate').value,
+      time: $('#timeSlotSelect').value,
+      notes: $('#apptNotes').value.trim()
+    };
+    if(State.editingId){
+      const appt = State.appointments.find(a=>a.id===State.editingId);
+      Object.assign(appt, data);
+      toast('Appointment updated.', 'success');
+    } else {
+      State.appointments.push({
+        id: nextId(), ...data, status:'confirmed', createdAt: Date.now()
+      });
+      // mark the matching slot as booked if it exists
+      const slot = State.timeSlots.find(s=>s.time===data.time);
+      if(slot) slot.booked = true;
+      toast('Appointment saved.', 'success');
+    }
+    closeBookingModal();
+    renderAll();
+  });
+
+  /* ============================================================
+     VIEW MODAL
+  ============================================================ */
+  function openViewModal(id){
+    const a = State.appointments.find(x=>x.id===id);
+    if(!a) return;
+    State.viewingId = id;
+    $('#viewModalBody').innerHTML = `
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:13.5px;">
+        <div><span class="cust-sub">Customer</span><br><strong>${escapeHtml(a.name)}</strong></div>
+        <div><span class="cust-sub">Service</span><br>${escapeHtml(a.service)}</div>
+        <div><span class="cust-sub">Date &amp; Time</span><br>${fmtDateLong(a.date)} · ${to12h(a.time)}</div>
+        <div><span class="cust-sub">Phone</span><br>${escapeHtml(a.phone)}</div>
+        <div><span class="cust-sub">Email</span><br>${escapeHtml(a.email)}</div>
+        <div><span class="cust-sub">Notes</span><br>${a.notes ? escapeHtml(a.notes) : '<em>None</em>'}</div>
+        <div><span class="status-badge ${a.status}">${a.status}</span></div>
+      </div>
+    `;
+    $('#viewOverlay').classList.add('open');
+  }
+  $('#closeViewModal').addEventListener('click', ()=>$('#viewOverlay').classList.remove('open'));
+  $('#viewOverlay').addEventListener('click', e=>{ if(e.target.id==='viewOverlay') $('#viewOverlay').classList.remove('open'); });
+
+  /* ============================================================
+     EMAIL / SMS SIMULATION
+  ============================================================ */
+  function showEmailSim(id){
+    const a = State.appointments.find(x=>x.id===id);
+    if(!a) return;
+    $('#emailPreviewBody').innerHTML = `
+      <div class="meta"><b>To:</b> ${escapeHtml(a.email)}</div>
+      <div class="meta"><b>Subject:</b> Appointment Reminder</div>
+      <hr style="border:none; border-top:1px solid var(--border); margin:10px 0;">
+      <p>Hello ${escapeHtml(a.name.split(' ')[0])},</p>
+      <p>This is a reminder that your appointment is scheduled for:</p>
+      <p><b>Date:</b> ${fmtDateLong(a.date)}<br><b>Time:</b> ${to12h(a.time)}<br><b>Service:</b> ${escapeHtml(a.service)}</p>
+      <p>Thank you.</p>
+    `;
+    $('#emailOverlay').classList.add('open');
+  }
+  function showSmsSim(id){
+    const a = State.appointments.find(x=>x.id===id);
+    if(!a) return;
+    const dayWord = a.date===todayISO ? 'today' : (a.date > todayISO ? `on ${fmtDateLong(a.date)}` : `on ${fmtDateLong(a.date)}`);
+    $('#smsPreviewBody').innerHTML = `
+      <p style="margin:0;"><b>Reminder:</b><br>Hi ${escapeHtml(a.name.split(' ')[0])}, your ${escapeHtml(a.service)} appointment is ${dayWord} at ${to12h(a.time)}. Reply STOP to opt out.</p>
+    `;
+    $('#smsOverlay').classList.add('open');
+  }
+  $('#closeEmailModal').addEventListener('click', ()=>$('#emailOverlay').classList.remove('open'));
+  $('#closeEmailModalBtn2').addEventListener('click', ()=>$('#emailOverlay').classList.remove('open'));
+  $('#closeSmsModal').addEventListener('click', ()=>$('#smsOverlay').classList.remove('open'));
+  $('#closeSmsModalBtn2').addEventListener('click', ()=>$('#smsOverlay').classList.remove('open'));
+  $('#emailFromViewBtn').addEventListener('click', ()=>{ $('#viewOverlay').classList.remove('open'); showEmailSim(State.viewingId); });
+  $('#smsFromViewBtn').addEventListener('click', ()=>{ $('#viewOverlay').classList.remove('open'); showSmsSim(State.viewingId); });
+
+  /* ============================================================
+     DELETE CONFIRM
+  ============================================================ */
+  function openConfirm(id){
+    const a = State.appointments.find(x=>x.id===id);
+    if(!a) return;
+    State.deletingId = id;
+    $('#confirmName').textContent = a.name;
+    $('#confirmOverlay').classList.add('open');
+  }
+  $('#closeConfirmModal').addEventListener('click', ()=>$('#confirmOverlay').classList.remove('open'));
+  $('#cancelConfirmBtn').addEventListener('click', ()=>$('#confirmOverlay').classList.remove('open'));
+  $('#confirmDeleteBtn').addEventListener('click', ()=>{
+    State.appointments = State.appointments.filter(a=>a.id!==State.deletingId);
+    $('#confirmOverlay').classList.remove('open');
+    toast('Appointment deleted.');
+    renderAll();
+  });
+
+  /* ============================================================
+     BOOKING TABLE — search / filter / sort
+  ============================================================ */
+  $('#searchInput').addEventListener('input', e=>{ State.search = e.target.value.toLowerCase(); renderTable(); });
+  $('#dateFilters').addEventListener('click', e=>{
+    const btn = e.target.closest('.chip-filter');
+    if(!btn) return;
+    $$('.chip-filter').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    State.filter = btn.dataset.filter;
+    renderTable();
+  });
+  $('#sortSelect').addEventListener('change', e=>{ State.sort = e.target.value; renderTable(); });
+
+  function inFilterRange(dateStr){
+    const d = new Date(dateStr+'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    if(State.filter==='all') return true;
+    if(State.filter==='today') return dateStr===todayISO;
+    if(State.filter==='week'){
+      const start = new Date(now); start.setDate(now.getDate()-now.getDay());
+      const end = new Date(start); end.setDate(start.getDate()+6);
+      return d>=start && d<=end;
+    }
+    if(State.filter==='month'){
+      return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();
+    }
+    return true;
+  }
+
+  function renderTable(){
+    let rows = State.appointments.filter(a=>{
+      const matchesSearch = !State.search ||
+        a.name.toLowerCase().includes(State.search) ||
+        a.service.toLowerCase().includes(State.search) ||
+        a.phone.toLowerCase().includes(State.search) ||
+        a.email.toLowerCase().includes(State.search);
+      return matchesSearch && inFilterRange(a.date);
+    });
+
+    rows.sort((a,b)=>{
+      if(State.sort==='newest') return b.createdAt - a.createdAt;
+      if(State.sort==='oldest') return a.createdAt - b.createdAt;
+      if(State.sort==='name') return a.name.localeCompare(b.name);
+      return 0;
+    });
+
+    const tbody = $('#bookingTbody');
+    const emptyState = $('#tableEmptyState');
+    if(rows.length===0){
+      tbody.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+    tbody.innerHTML = rows.map(a=>`
+      <tr>
+        <td><div class="cust-name">${escapeHtml(a.name)}</div></td>
+        <td>${escapeHtml(a.service)}</td>
+        <td>${fmtDateLong(a.date)}</td>
+        <td style="font-family:var(--font-mono); font-size:12.5px;">${to12h(a.time)}</td>
+        <td><div>${escapeHtml(a.phone)}</div><div class="cust-sub">${escapeHtml(a.email)}</div></td>
+        <td><span class="status-badge ${a.status}">${a.status}</span></td>
+        <td>
+          <div class="table-actions">
+            <button class="icon-btn" data-view="${a.id}" aria-label="View ${escapeHtml(a.name)}" title="View">👁</button>
+            <button class="icon-btn" data-edit="${a.id}" aria-label="Edit ${escapeHtml(a.name)}" title="Edit">✎</button>
+            <button class="icon-btn danger" data-del="${a.id}" aria-label="Delete ${escapeHtml(a.name)}" title="Delete">🗑</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  $('#bookingTbody').addEventListener('click', e=>{
+    const v = e.target.closest('[data-view]');
+    const ed = e.target.closest('[data-edit]');
+    const d = e.target.closest('[data-del]');
+    if(v) openViewModal(Number(v.dataset.view));
+    if(ed) openEditModal(Number(ed.dataset.edit));
+    if(d) openConfirm(Number(d.dataset.del));
+  });
+
+  /* ============================================================
+     UTIL
+  ============================================================ */
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  /* ============================================================
+     KEYBOARD: close any open modal with Escape
+  ============================================================ */
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){
+      $$('.overlay.open').forEach(o=>o.classList.remove('open'));
+    }
+  });
+
+  /* ============================================================
+     MASTER RENDER
+  ============================================================ */
+  function renderAll(){
+    renderCalendar();
+    renderSelectedDatePanel();
+    renderSlots();
+    renderStats();
+    populateServiceSelect();
+    populateTimeSlotSelect();
+    renderTable();
+  }
+
+})();
+</script>
+</body>
+</html>
