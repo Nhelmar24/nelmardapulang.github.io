@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>N24SS CRM — Lead Management</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN SCREEN
+============================================================ -->
+<section id="loginScreen" class="login-screen">
+  <button class="theme-toggle login-theme-toggle" id="themeToggleLogin" aria-label="Toggle dark mode" title="Toggle dark mode">
+    <span class="knob">
+      <svg viewBox="0 0 24 24"><path d="M12 4.5a1 1 0 0 1-1-1V2a1 1 0 0 1 2 0v1.5a1 1 0 0 1-1 1Zm0 15a1 1 0 0 1 1 1V22a1 1 0 0 1-2 0v-1.5a1 1 0 0 1 1-1ZM4.5 12a1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h1.5a1 1 0 0 1 1 1Zm15 0a1 1 0 0 1 1-1H22a1 1 0 0 1 0 2h-1.5a1 1 0 0 1-1-1ZM6.3 7.7a1 1 0 0 1-1.4 0L3.8 6.6a1 1 0 1 1 1.4-1.4l1.1 1.1a1 1 0 0 1 0 1.4Zm11.4 11.4a1 1 0 0 1-1.4 0l-1.1-1.1a1 1 0 1 1 1.4-1.4l1.1 1.1a1 1 0 0 1 0 1.4ZM6.3 16.3a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 1 1-1.4-1.4l1.1-1.1a1 1 0 0 1 1.4 0Zm11.4-11.4a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 1 1-1.4-1.4l1.1-1.1a1 1 0 0 1 1.4 0ZM12 7a5 5 0 1 1-5 5 5 5 0 0 1 5-5Z"/></svg>
+    </span>
+  </button>
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">N</div>
+      <span>N24SS <strong>CRM</strong></span>
+    </div>
+    <h1>Welcome back</h1>
+    <p class="login-sub">Sign in to manage your pipeline. This is a demo — any credentials work.</p>
+
+    <form id="loginForm" class="login-form">
+      <label class="field">
+        <span>Username</span>
+        <input type="text" id="loginUsername" placeholder="e.g. maria.santos" value="admin" required />
+      </label>
+      <label class="field">
+        <span>Password</span>
+        <input type="password" id="loginPassword" placeholder="••••••••" value="demo1234" required />
+      </label>
+      <button type="submit" class="btn btn-primary btn-block">Log in</button>
+    </form>
+    <p class="login-note">No real authentication — this loads temporary demo data into memory.</p>
+  </div>
+</section>
+
+<!-- ============================================================
+     APP SHELL
+============================================================ -->
+<div id="appShell" class="app-shell hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">N</div>
+      <span>N24SS <strong>CRM</strong></span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 13h8V3H3v10Zm10 8h8V3h-8v18ZM3 21h8v-6H3v6Z"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-item" data-view="leads">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M4 5h16v2H4V5Zm0 6h16v2H4v-2Zm0 6h10v2H4v-2Z"/></svg>
+        Leads
+      </button>
+      <button class="nav-item" data-view="pipeline">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M3 4h5v16H3V4Zm7 4h5v12h-5V8Zm7-7h4v19h-4V1Z"/></svg>
+        Pipeline
+      </button>
+      <button class="nav-item" data-view="salespersons">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-4-4 4 4 0 0 0 4 4Zm-8 1a3.5 3.5 0 1 0-3.5-3.5A3.5 3.5 0 0 0 8 12Zm8 2c-2.7 0-8 1.34-8 4v3h16v-3c0-2.66-5.3-4-8-4Zm-8 1c-.29 0-.62.02-.97.05C5.6 15.6 4 16.6 4 18v2h4v-2.5c0-.98.4-1.86 1.03-2.5-.34.02-.68 0-1.03 0Z"/></svg>
+        Salespersons
+      </button>
+      <button class="nav-item" data-view="reports">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 13h2V9H7v7Zm4 0h2V6h-2v10Zm4 0h2v-4h-2v4Z"/></svg>
+        Reports
+      </button>
+      <button class="nav-item" data-view="settings">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Zm7.4-3a7.4 7.4 0 0 0-.13-1.39l2.02-1.58-2-3.46-2.38.96a7.6 7.6 0 0 0-1.2-.7L15.3 4h-4.6l-.4 2.33a7.6 7.6 0 0 0-1.2.7L6.72 6.07l-2 3.46 2.02 1.58a7.4 7.4 0 0 0 0 2.78L4.72 15.5l2 3.46 2.38-.96c.37.28.77.51 1.2.7L10.7 21h4.6l.4-2.3c.43-.19.83-.42 1.2-.7l2.38.96 2-3.46-2.02-1.58c.09-.46.14-.92.14-1.42Z"/></svg>
+        Settings
+      </button>
+    </nav>
+
+    <button id="logoutBtn" class="nav-item logout-item">
+      <svg class="ic" viewBox="0 0 24 24"><path d="M10 17v-2H3v-6h7V7l5 5-5 5Zm9 2H12v-2h7V5h-7V3h7a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2Z"/></svg>
+      Logout
+    </button>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-col">
+
+    <!-- TOP NAVBAR -->
+    <header class="topbar">
+      <button id="mobileNavToggle" class="icon-btn mobile-only" aria-label="Open menu">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z"/></svg>
+      </button>
+      <div class="topbar-search">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.47 6.47 0 0 0 1.57-4.23 6.5 6.5 0 1 0-6.5 6.5 6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search leads by name, company, phone, email..." />
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="knob">
+            <svg viewBox="0 0 24 24"><path d="M12 4.5a1 1 0 0 1-1-1V2a1 1 0 0 1 2 0v1.5a1 1 0 0 1-1 1Zm0 15a1 1 0 0 1 1 1V22a1 1 0 0 1-2 0v-1.5a1 1 0 0 1 1-1ZM4.5 12a1 1 0 0 1-1 1H2a1 1 0 0 1 0-2h1.5a1 1 0 0 1 1 1Zm15 0a1 1 0 0 1 1-1H22a1 1 0 0 1 0 2h-1.5a1 1 0 0 1-1-1ZM6.3 7.7a1 1 0 0 1-1.4 0L3.8 6.6a1 1 0 1 1 1.4-1.4l1.1 1.1a1 1 0 0 1 0 1.4Zm11.4 11.4a1 1 0 0 1-1.4 0l-1.1-1.1a1 1 0 1 1 1.4-1.4l1.1 1.1a1 1 0 0 1 0 1.4ZM6.3 16.3a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 1 1-1.4-1.4l1.1-1.1a1 1 0 0 1 1.4 0Zm11.4-11.4a1 1 0 0 1 0 1.4l-1.1 1.1a1 1 0 1 1-1.4-1.4l1.1-1.1a1 1 0 0 1 1.4 0ZM12 7a5 5 0 1 1-5 5 5 5 0 0 1 5-5Z"/></svg>
+          </span>
+        </button>
+        <button class="icon-btn" id="notifBtn" aria-label="Notifications">
+          <svg viewBox="0 0 24 24"><path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22Zm7-6v-5a7 7 0 0 0-5.5-6.84V3a1.5 1.5 0 0 0-3 0v1.16A7 7 0 0 0 5 11v5l-1.7 1.7a1 1 0 0 0 .7 1.71h16a1 1 0 0 0 .7-1.71L19 16Z"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="user-chip">
+          <div class="avatar" id="currentUserAvatar">A</div>
+          <div class="user-chip-text">
+            <strong id="currentUserName">Admin User</strong>
+            <span>Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- VIEW: DASHBOARD -->
+    <main class="view active" id="view-dashboard">
+      <div class="view-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p class="muted">Here's what's happening with your leads today.</p>
+        </div>
+        <button class="btn btn-primary" data-action="open-add-lead">+ Add Lead</button>
+      </div>
+
+      <div class="stat-grid" id="statGrid"></div>
+
+      <div class="dash-grid">
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Recent Activities</h2>
+          </div>
+          <ul class="timeline" id="recentActivities"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Upcoming Follow-ups</h2>
+          </div>
+          <ul class="list-simple" id="upcomingFollowups"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Latest Notes</h2>
+          </div>
+          <ul class="list-simple" id="latestNotes"></ul>
+        </section>
+      </div>
+    </main>
+
+    <!-- VIEW: LEADS -->
+    <main class="view" id="view-leads">
+      <div class="view-head">
+        <div>
+          <h1>Leads</h1>
+          <p class="muted">All leads in your database.</p>
+        </div>
+        <button class="btn btn-primary" data-action="open-add-lead">+ Add Lead</button>
+      </div>
+
+      <div class="filter-bar">
+        <select id="filterStatus"><option value="">All statuses</option></select>
+        <select id="filterSource"><option value="">All sources</option></select>
+        <select id="filterSalesperson"><option value="">All salespersons</option></select>
+        <select id="filterPriority"><option value="">All priorities</option></select>
+        <input type="date" id="filterDateFrom" title="From date" />
+        <input type="date" id="filterDateTo" title="To date" />
+        <button class="btn btn-ghost" id="clearFiltersBtn">Clear</button>
+      </div>
+
+      <div class="table-wrap panel">
+        <table class="lead-table">
+          <thead>
+            <tr>
+              <th>Lead ID</th>
+              <th>Customer</th>
+              <th>Company</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Source</th>
+              <th>Salesperson</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="leadsTableBody"></tbody>
+        </table>
+        <p class="empty-state hidden" id="leadsEmptyState">No leads match your search or filters.</p>
+      </div>
+    </main>
+
+    <!-- VIEW: PIPELINE -->
+    <main class="view" id="view-pipeline">
+      <div class="view-head">
+        <div>
+          <h1>Pipeline</h1>
+          <p class="muted">Drag a card to move a lead through your pipeline.</p>
+        </div>
+        <button class="btn btn-primary" data-action="open-add-lead">+ Add Lead</button>
+      </div>
+      <div class="kanban" id="kanbanBoard"></div>
+    </main>
+
+    <!-- VIEW: SALESPERSONS -->
+    <main class="view" id="view-salespersons">
+      <div class="view-head">
+        <div>
+          <h1>Salespersons</h1>
+          <p class="muted">Team performance across active leads.</p>
+        </div>
+      </div>
+      <div class="card-grid" id="salespersonGrid"></div>
+    </main>
+
+    <!-- VIEW: REPORTS -->
+    <main class="view" id="view-reports">
+      <div class="view-head">
+        <div>
+          <h1>Reports</h1>
+          <p class="muted">A quick snapshot of pipeline health.</p>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <section class="panel">
+          <div class="panel-head"><h2>Leads by Status</h2></div>
+          <div id="reportByStatus" class="bar-report"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Leads by Source</h2></div>
+          <div id="reportBySource" class="bar-report"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Leads by Salesperson</h2></div>
+          <div id="reportBySalesperson" class="bar-report"></div>
+        </section>
+      </div>
+    </main>
+
+    <!-- VIEW: SETTINGS -->
+    <main class="view" id="view-settings">
+      <div class="view-head">
+        <div>
+          <h1>Settings</h1>
+          <p class="muted">Workspace preferences for this demo session.</p>
+        </div>
+      </div>
+      <section class="panel settings-panel">
+        <h2>Session data</h2>
+        <p class="muted">All data lives only in this browser tab's memory. Refreshing or logging out permanently erases it.</p>
+        <button class="btn btn-danger" id="resetDataBtn">Reset demo data</button>
+      </section>
+    </main>
+
+    <!-- VIEW: LEAD DETAILS -->
+    <main class="view" id="view-lead-detail">
+      <button class="btn btn-ghost" data-action="back-to-leads">&larr; Back to Leads</button>
+
+      <div class="detail-head">
+        <div class="detail-id-block">
+          <div class="avatar avatar-lg" id="detailAvatar">?</div>
+          <div>
+            <h1 id="detailName">—</h1>
+            <p class="muted" id="detailCompany">—</p>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <span class="badge" id="detailStatusBadge">—</span>
+          <button class="btn btn-ghost" data-action="edit-current-lead">Edit</button>
+          <button class="btn btn-danger" data-action="delete-current-lead">Delete</button>
+        </div>
+      </div>
+
+      <div class="detail-grid">
+        <section class="panel">
+          <div class="panel-head"><h2>Customer Information</h2></div>
+          <dl class="info-list" id="detailInfoList"></dl>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Follow-up Schedule</h2></div>
+          <ul class="list-simple" id="detailFollowups"></ul>
+          <button class="btn btn-secondary btn-block" data-action="open-add-followup">+ Schedule Follow-up</button>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-head"><h2>Activity Timeline</h2></div>
+          <ul class="timeline" id="detailTimeline"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Notes</h2></div>
+          <form id="addNoteForm" class="inline-form">
+            <textarea id="newNoteContent" placeholder="Write a note about this lead..." rows="2" required></textarea>
+            <button type="submit" class="btn btn-primary">Add Note</button>
+          </form>
+          <ul class="notes-list" id="detailNotes"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><h2>Attachments</h2></div>
+          <label class="file-drop">
+            <input type="file" id="attachmentInput" multiple hidden />
+            <span>Click to select files (stored temporarily only)</span>
+          </label>
+          <ul class="attachments-list" id="detailAttachments"></ul>
+        </section>
+
+        <section class="panel span-2">
+          <div class="panel-head"><h2>Status History</h2></div>
+          <ul class="list-simple" id="detailStatusHistory"></ul>
+        </section>
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: ADD / EDIT LEAD
+============================================================ -->
+<div class="modal-overlay hidden" id="leadModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="leadModalTitle">Add New Lead</h2>
+      <button class="icon-btn" data-action="close-lead-modal" aria-label="Close">&times;</button>
+    </div>
+    <form id="leadForm" class="modal-body two-col">
+      <input type="hidden" id="leadIdInput" />
+
+      <label class="field"><span>Customer Name *</span><input type="text" id="f_name" required /></label>
+      <label class="field"><span>Company</span><input type="text" id="f_company" /></label>
+      <label class="field"><span>Phone *</span><input type="tel" id="f_phone" required /></label>
+      <label class="field"><span>Email</span><input type="email" id="f_email" /></label>
+      <label class="field"><span>Facebook</span><input type="text" id="f_facebook" placeholder="facebook.com/username" /></label>
+      <label class="field span-2"><span>Address</span><input type="text" id="f_address" /></label>
+
+      <label class="field">
+        <span>Lead Source *</span>
+        <select id="f_source" required>
+          <option>Facebook</option>
+          <option>Website</option>
+          <option>Referral</option>
+          <option>Walk-in</option>
+          <option>Phone Call</option>
+          <option>Email Campaign</option>
+          <option>Trade Show</option>
+        </select>
+      </label>
+      <label class="field"><span>Service Interested</span><input type="text" id="f_service" /></label>
+      <label class="field"><span>Budget</span><input type="number" id="f_budget" min="0" placeholder="0.00" /></label>
+      <label class="field">
+        <span>Priority</span>
+        <select id="f_priority">
+          <option>Low</option>
+          <option selected>Medium</option>
+          <option>High</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Assigned Salesperson *</span>
+        <select id="f_salesperson" required></select>
+      </label>
+      <label class="field">
+        <span>Status</span>
+        <select id="f_status">
+          <option>New</option>
+          <option>Contacted</option>
+          <option>Quotation Sent</option>
+          <option>Negotiation</option>
+          <option>Won</option>
+          <option>Lost</option>
+        </select>
+      </label>
+      <label class="field span-2"><span>Remarks</span><textarea id="f_remarks" rows="2"></textarea></label>
+    </form>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-action="close-lead-modal">Cancel</button>
+      <button class="btn btn-primary" id="saveLeadBtn" form="leadForm">Save Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL: SCHEDULE FOLLOW-UP
+============================================================ -->
+<div class="modal-overlay hidden" id="followupModalOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h2>Schedule Follow-up</h2>
+      <button class="icon-btn" data-action="close-followup-modal" aria-label="Close">&times;</button>
+    </div>
+    <form id="followupForm" class="modal-body">
+      <label class="field"><span>Date *</span><input type="date" id="fu_date" required /></label>
+      <label class="field"><span>Time *</span><input type="time" id="fu_time" required /></label>
+      <label class="field"><span>Purpose</span><input type="text" id="fu_purpose" placeholder="e.g. Send revised quote" /></label>
+      <label class="field">
+        <span>Assigned Salesperson</span>
+        <select id="fu_salesperson"></select>
+      </label>
+      <label class="field checkbox-field">
+        <input type="checkbox" id="fu_reminder" checked />
+        <span>Set reminder</span>
+      </label>
+    </form>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-action="close-followup-modal">Cancel</button>
+      <button class="btn btn-primary" form="followupForm">Save Follow-up</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CONFIRM DIALOG (generic)
+============================================================ -->
+<div class="modal-overlay hidden" id="confirmOverlay">
+  <div class="modal modal-xs">
+    <div class="modal-body">
+      <p id="confirmMessage">Are you sure?</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
