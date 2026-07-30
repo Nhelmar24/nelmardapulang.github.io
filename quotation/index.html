@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N24SS Quotation Generator</title>
+<link rel="stylesheet" href="style.css">
+<!-- PDF export libraries (client-side only, no backend involved) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ============================================================
+     LOGIN SCREEN
+============================================================ -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark">N24</div>
+      <h1>N24SS Quotation Generator</h1>
+      <p>Sign in to manage quotations, customers &amp; items</p>
+    </div>
+    <form id="loginForm" class="login-form">
+      <label for="loginUsername">Username</label>
+      <input type="text" id="loginUsername" placeholder="admin" value="admin" autocomplete="username" required>
+
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" value="admin123" autocomplete="current-password" required>
+
+      <button type="submit" class="btn btn-primary btn-block">Login</button>
+      <p class="login-hint">Demo mode — any username &amp; password will work.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN APPLICATION SHELL
+============================================================ -->
+<div id="appShell" class="app-shell hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-mark small">N24</div>
+      <span class="sidebar-title">N24SS</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <span class="nav-icon" data-icon="grid"></span><span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-item" data-view="quotation">
+        <span class="nav-icon" data-icon="file-plus"></span><span class="nav-label">Quotation Generator</span>
+      </button>
+      <button class="nav-item" data-view="customers">
+        <span class="nav-icon" data-icon="users"></span><span class="nav-label">Customers</span>
+      </button>
+      <button class="nav-item" data-view="company">
+        <span class="nav-icon" data-icon="building"></span><span class="nav-label">Company Profile</span>
+      </button>
+      <button class="nav-item" data-view="items">
+        <span class="nav-icon" data-icon="box"></span><span class="nav-label">Items</span>
+      </button>
+      <button class="nav-item" data-view="settings">
+        <span class="nav-icon" data-icon="settings"></span><span class="nav-label">Settings</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="nav-item logout-btn" id="logoutBtn">
+        <span class="nav-icon" data-icon="logout"></span><span class="nav-label">Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- MAIN COLUMN -->
+  <div class="main-col">
+
+    <!-- TOP NAVIGATION -->
+    <header class="topnav">
+      <div class="topnav-left">
+        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Toggle menu">
+          <span class="nav-icon" data-icon="menu"></span>
+        </button>
+        <div class="search-bar">
+          <span class="nav-icon" data-icon="search"></span>
+          <input type="text" id="globalSearch" placeholder="Search quotations by customer, company, phone, email...">
+        </div>
+      </div>
+      <div class="topnav-right">
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <span class="nav-icon" data-icon="sun" id="themeIcon"></span>
+        </button>
+        <button class="icon-btn notif-btn" aria-label="Notifications">
+          <span class="nav-icon" data-icon="bell"></span>
+          <span class="notif-badge">3</span>
+        </button>
+        <div class="topnav-divider"></div>
+        <div class="user-profile">
+          <div class="avatar">A</div>
+          <div class="user-meta">
+            <span class="user-name">Admin</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- VIEWS -->
+    <main class="content" id="content">
+
+      <!-- SEARCH RESULTS VIEW -->
+      <section class="view" id="view-search">
+        <div class="view-header">
+          <div>
+            <h1>Search Results</h1>
+            <p class="view-sub" id="searchResultsSub">Results for your search</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table" id="searchResultsTable">
+              <thead>
+                <tr><th>Quotation #</th><th>Customer</th><th>Company</th><th>Date</th><th>Status</th><th>Total</th><th></th></tr>
+              </thead>
+              <tbody id="searchResultsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD VIEW -->
+      <section class="view active" id="view-dashboard">
+        <div class="view-header">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="view-sub">Overview of your quotation activity</p>
+          </div>
+          <button class="btn btn-primary" data-view-nav="quotation">
+            <span class="nav-icon" data-icon="plus"></span> New Quotation
+          </button>
+        </div>
+
+        <div class="stat-grid" id="statGrid"></div>
+
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Recent Quotations</h3></div>
+            <div class="table-wrap">
+              <table class="data-table" id="recentQuotationsTable">
+                <thead><tr><th>Quotation #</th><th>Customer</th><th>Date</th><th>Status</th><th>Total</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Recent Activities</h3></div>
+            <ul class="activity-list" id="activityList"></ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>Upcoming Follow-ups</h3></div>
+          <ul class="followup-list" id="followupList"></ul>
+        </div>
+      </section>
+
+      <!-- QUOTATION GENERATOR VIEW -->
+      <section class="view" id="view-quotation">
+        <div class="view-header">
+          <div>
+            <h1>N24SS Quotation</h1>
+            <p class="view-sub">Create a professional quotation</p>
+          </div>
+          <div class="view-header-actions">
+            <button class="btn btn-secondary" id="newQuotationBtn">
+              <span class="nav-icon" data-icon="plus"></span> New
+            </button>
+            <button class="btn btn-primary" id="previewQuotationBtn">
+              <span class="nav-icon" data-icon="eye"></span> Preview
+            </button>
+          </div>
+        </div>
+
+        <div class="quotation-grid">
+          <div class="card">
+            <div class="card-head"><h3>Quotation Details</h3></div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Quotation Number</label>
+                <input type="text" id="qNumber" readonly>
+              </div>
+              <div class="form-field">
+                <label>Customer</label>
+                <select id="qCustomer"></select>
+              </div>
+              <div class="form-field">
+                <label>Quotation Date</label>
+                <input type="date" id="qDate">
+              </div>
+              <div class="form-field">
+                <label>Valid Until</label>
+                <input type="date" id="qValidUntil">
+              </div>
+              <div class="form-field">
+                <label>Prepared By</label>
+                <input type="text" id="qPreparedBy" value="Admin">
+              </div>
+              <div class="form-field">
+                <label>Status</label>
+                <select id="qStatus">
+                  <option>Draft</option>
+                  <option>Sent</option>
+                  <option>Approved</option>
+                  <option>Rejected</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>Items</h3>
+              <button class="btn btn-sm btn-secondary" id="addQuotationItemBtn">
+                <span class="nav-icon" data-icon="plus"></span> Add Item
+              </button>
+            </div>
+            <div class="table-wrap">
+              <table class="data-table" id="qItemsTable">
+                <thead>
+                  <tr><th>Item</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Amount</th><th></th></tr>
+                </thead>
+                <tbody id="qItemsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Discount &amp; Tax</h3></div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Discount Type</label>
+                <select id="qDiscountType">
+                  <option value="percent">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Discount Value</label>
+                <input type="number" id="qDiscountValue" min="0" value="0" step="0.01">
+              </div>
+              <div class="form-field">
+                <label>Tax (%)</label>
+                <input type="number" id="qTaxPercent" min="0" value="12" step="0.01">
+              </div>
+            </div>
+            <div class="totals-box">
+              <div class="totals-row"><span>Subtotal</span><span id="totalSubtotal">₱0.00</span></div>
+              <div class="totals-row"><span>Discount</span><span id="totalDiscount">-₱0.00</span></div>
+              <div class="totals-row"><span>Tax</span><span id="totalTax">₱0.00</span></div>
+              <div class="totals-row grand"><span>Grand Total</span><span id="totalGrand">₱0.00</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Notes</h3></div>
+            <textarea id="qNotes" rows="3" placeholder="Special instructions, project details, customer requirements..."></textarea>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Terms &amp; Conditions</h3></div>
+            <textarea id="qTerms" rows="5"></textarea>
+          </div>
+
+          <div class="card">
+            <button class="btn btn-primary btn-block" id="saveQuotationBtn">
+              <span class="nav-icon" data-icon="save"></span> Save Quotation
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CUSTOMERS VIEW -->
+      <section class="view" id="view-customers">
+        <div class="view-header">
+          <div>
+            <h1>N24SS Customers</h1>
+            <p class="view-sub">Manage your customer records</p>
+          </div>
+          <button class="btn btn-primary" id="addCustomerBtn">
+            <span class="nav-icon" data-icon="plus"></span> Add Customer
+          </button>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <input type="text" class="table-search" id="customerSearch" placeholder="Search customers...">
+          </div>
+          <div class="table-wrap">
+            <table class="data-table" id="customersTable">
+              <thead>
+                <tr><th>Name</th><th>Company</th><th>Contact Person</th><th>Phone</th><th>Email</th><th>Tax No.</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- COMPANY PROFILE VIEW -->
+      <section class="view" id="view-company">
+        <div class="view-header">
+          <div>
+            <h1>N24SS Company Profile</h1>
+            <p class="view-sub">Information shown on your quotations</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="form-grid company-form">
+            <div class="form-field logo-field">
+              <label>Company Logo</label>
+              <div class="logo-upload" id="logoUpload">
+                <img id="logoPreview" class="logo-preview hidden" alt="Company logo">
+                <span id="logoPlaceholder">No logo uploaded</span>
+              </div>
+              <input type="file" id="logoInput" accept="image/*" class="hidden">
+              <button class="btn btn-sm btn-secondary" id="logoUploadBtn" type="button">Upload Logo</button>
+            </div>
+            <div class="form-field"><label>Company Name</label><input type="text" id="cName"></div>
+            <div class="form-field"><label>Company Address</label><input type="text" id="cAddress"></div>
+            <div class="form-field"><label>Phone</label><input type="text" id="cPhone"></div>
+            <div class="form-field"><label>Email</label><input type="email" id="cEmail"></div>
+            <div class="form-field"><label>Website</label><input type="text" id="cWebsite"></div>
+            <div class="form-field"><label>Tax Number</label><input type="text" id="cTax"></div>
+            <div class="form-field"><label>Authorized Person</label><input type="text" id="cAuthorized"></div>
+            <div class="form-field"><label>Position</label><input type="text" id="cPosition"></div>
+          </div>
+          <button class="btn btn-primary" id="saveCompanyBtn">Save Company Profile</button>
+        </div>
+      </section>
+
+      <!-- ITEMS VIEW -->
+      <section class="view" id="view-items">
+        <div class="view-header">
+          <div>
+            <h1>N24SS Items</h1>
+            <p class="view-sub">Products &amp; services catalog</p>
+          </div>
+          <button class="btn btn-primary" id="addItemBtn">
+            <span class="nav-icon" data-icon="plus"></span> Add Item
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="data-table" id="itemsTable">
+              <thead>
+                <tr><th>Item Name</th><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Total</th><th></th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section class="view" id="view-settings">
+        <div class="view-header">
+          <div>
+            <h1>Settings</h1>
+            <p class="view-sub">Application preferences</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Appearance</h3></div>
+          <div class="settings-row">
+            <div>
+              <strong>Theme</strong>
+              <p class="muted">Switch between light and dark mode</p>
+            </div>
+            <button class="btn btn-secondary" id="settingsThemeBtn">Toggle Theme</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Session</h3></div>
+          <div class="settings-row">
+            <div>
+              <strong>Data Storage</strong>
+              <p class="muted">All data is stored in memory only and clears on logout.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODALS
+============================================================ -->
+
+<!-- Customer Modal -->
+<div class="modal-overlay hidden" id="customerModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="customerModalTitle">Add Customer</h3>
+      <button class="icon-btn modal-close" data-close="customerModal">&times;</button>
+    </div>
+    <div class="modal-body form-grid">
+      <input type="hidden" id="customerId">
+      <div class="form-field"><label>Customer Name</label><input type="text" id="custName"></div>
+      <div class="form-field"><label>Company Name</label><input type="text" id="custCompany"></div>
+      <div class="form-field"><label>Contact Person</label><input type="text" id="custContact"></div>
+      <div class="form-field"><label>Phone Number</label><input type="text" id="custPhone"></div>
+      <div class="form-field"><label>Email Address</label><input type="email" id="custEmail"></div>
+      <div class="form-field full"><label>Address</label><input type="text" id="custAddress"></div>
+      <div class="form-field"><label>Tax Number</label><input type="text" id="custTax"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" data-close="customerModal">Cancel</button>
+      <button class="btn btn-primary" id="saveCustomerBtn">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Item Modal -->
+<div class="modal-overlay hidden" id="itemModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="itemModalTitle">Add Item</h3>
+      <button class="icon-btn modal-close" data-close="itemModal">&times;</button>
+    </div>
+    <div class="modal-body form-grid">
+      <input type="hidden" id="itemId">
+      <div class="form-field full"><label>Item Name</label><input type="text" id="itmName"></div>
+      <div class="form-field full"><label>Description</label><input type="text" id="itmDesc"></div>
+      <div class="form-field"><label>Quantity</label><input type="number" id="itmQty" value="1" min="0" step="1"></div>
+      <div class="form-field"><label>Unit</label><input type="text" id="itmUnit" value="pc"></div>
+      <div class="form-field"><label>Unit Price</label><input type="number" id="itmPrice" value="0" min="0" step="0.01"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" data-close="itemModal">Cancel</button>
+      <button class="btn btn-primary" id="saveItemBtn">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Quotation Item Modal -->
+<div class="modal-overlay hidden" id="qItemModal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Add Item to Quotation</h3>
+      <button class="icon-btn modal-close" data-close="qItemModal">&times;</button>
+    </div>
+    <div class="modal-body form-grid">
+      <div class="form-field full">
+        <label>Select from Catalog (optional)</label>
+        <select id="qItemCatalog"><option value="">-- Custom item --</option></select>
+      </div>
+      <div class="form-field full"><label>Item Name</label><input type="text" id="qiName"></div>
+      <div class="form-field full"><label>Description</label><input type="text" id="qiDesc"></div>
+      <div class="form-field"><label>Quantity</label><input type="number" id="qiQty" value="1" min="0" step="1"></div>
+      <div class="form-field"><label>Unit</label><input type="text" id="qiUnit" value="pc"></div>
+      <div class="form-field"><label>Unit Price</label><input type="number" id="qiPrice" value="0" min="0" step="0.01"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" data-close="qItemModal">Cancel</button>
+      <button class="btn btn-primary" id="saveQItemBtn">Add to Quotation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal (generic) -->
+<div class="modal-overlay hidden" id="confirmModal">
+  <div class="modal modal-sm">
+    <div class="modal-head">
+      <h3 id="confirmTitle">Are you sure?</h3>
+      <button class="icon-btn modal-close" data-close="confirmModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage">This action cannot be undone.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" data-close="confirmModal">Cancel</button>
+      <button class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Quotation Preview Modal -->
+<div class="modal-overlay hidden" id="previewModal">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3>N24SS Quotation Generator — Preview</h3>
+      <div class="modal-head-actions">
+        <button class="btn btn-sm btn-primary" id="exportPdfBtn">
+          <span class="nav-icon" data-icon="download"></span> Export PDF
+        </button>
+        <button class="icon-btn modal-close" data-close="previewModal">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body preview-scroll">
+      <div id="quotationPreviewDoc" class="quote-doc"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
